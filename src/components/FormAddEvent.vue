@@ -3,44 +3,29 @@
         <v-dialog :value="isActive" persistent max-width="600px">
             <v-card>
                 <v-card-title>
-                    <span class="headline">User Profile</span>
+                    <span class="headline">Neue Reservierungsanfrage</span>
                 </v-card-title>
                 <v-card-text>
                     <v-container>
                         <v-row>
                             <v-col cols="12" sm="6" md="4">
-                                <v-text-field label="Legal first name*" required></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" md="4">
-                                <v-text-field label="Legal middle name" hint="example of helper text only on focus"></v-text-field>
-                            </v-col>
-                            <v-col cols="12" sm="6" md="4">
-                                <v-text-field
-                                        label="Legal last name*"
-                                        hint="example of persistent helper text"
-                                        persistent-hint
-                                        required
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-text-field label="Email*" required></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-text-field label="Password*" type="password" required></v-text-field>
+                                <v-text-field label="Name*" required></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-select
-                                        :items="['0-17', '18-29', '30-54', '54+']"
-                                        label="Age*"
+                                        prepend-icon="mdi-car"
+                                        :items="['Red Bus', 'White Bus', 'e-Auto', 'Little Red']"
+                                        label="Auto*"
                                         required
                                 ></v-select>
                             </v-col>
+                        </v-row>
+                        <v-row justify="space-around" align="center">
                             <v-col cols="12" sm="6">
-                                <v-autocomplete
-                                        :items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']"
-                                        label="Interests"
-                                        multiple
-                                ></v-autocomplete>
+                                <v-time-picker :width="260" format="24hr" v-model="start" :max="end"></v-time-picker>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                                <v-time-picker :width="260" format="24hr" v-model="end" :min="start"></v-time-picker>
                             </v-col>
                         </v-row>
                     </v-container>
