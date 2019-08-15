@@ -99,13 +99,20 @@
                         </v-card-actions>
                     </v-card>
                 </v-menu>
+                <form-add-event v-bind:is-active.sync="showAddEventForm"/>
             </v-sheet>
         </v-col>
     </v-row>
 </template>
 
 <script>
+    import FormAddEvent from "./FormAddEvent";
+
     export default {
+        components: {FormAddEvent},
+        comments: {
+            FormAddEvent
+        },
         computed: {
             title() {
                 const {start, end} = this
@@ -143,7 +150,10 @@
         },
         methods: {
             addEvent(time){
+
+                // eslint-disable-next-line
                 console.log(time)
+                this.showAddEventForm = true
             },
             viewDay({date}) {
                 this.focus = date
@@ -189,6 +199,7 @@
             },
         },
         data: () => ({
+            showAddEventForm: false,
             today: '2019-01-08',
             focus: '2019-01-08',
             type: 'month',
