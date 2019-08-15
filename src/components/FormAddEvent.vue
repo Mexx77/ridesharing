@@ -1,6 +1,6 @@
 <template>
     <v-row justify="center">
-        <v-dialog v-model="isActive" persistent max-width="600px">
+        <v-dialog :value="isActive" persistent max-width="600px">
             <v-card>
                 <v-card-title>
                     <span class="headline">User Profile</span>
@@ -61,13 +61,11 @@
         props: ['isActive'],
         methods: {
             close: function() {
-                this.isActive = false
                 this.$emit('update:isActive', false)
             }
         },
         data: function () {
             return {
-
             }
         }
     }
