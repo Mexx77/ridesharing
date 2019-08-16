@@ -1,6 +1,6 @@
 <template>
     <v-row justify="center">
-        <v-dialog :value="isActive" persistent max-width="600px">
+        <v-dialog :value="isActive" v-on:click:outside="close" max-width="600px">
             <v-card>
                 <v-card-title>
                     <span class="headline">Neue Reservierungsanfrage</span>
@@ -49,9 +49,9 @@
                 this.$emit('update:isActive', false)
             }
         },
-        data: function () {
-            return {
-            }
-        }
+        data: () => ({
+            start: '',
+            end: ''
+        })
     }
 </script>
