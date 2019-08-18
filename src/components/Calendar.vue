@@ -51,6 +51,8 @@
                         :event-margin-bottom="3"
                         :now="today"
                         :type="type"
+                        :first-interval="7"
+                        :interval-count="15"
                         @click:event="showEvent"
                         @click:more="viewDay"
                         @click:date="viewDay"
@@ -99,20 +101,71 @@
                         </v-card-actions>
                     </v-card>
                 </v-menu>
-                <form-add-event v-bind:is-active.sync="showAddEventForm"/>
+                <v-row justify="center">
+                    <v-dialog
+                            v-model="showAddEventForm"
+                            :fullscreen="$vuetify.breakpoint.smAndDown ? true : false"
+                            hide-overlay max-width="600px"
+                    >
+                        <v-card>
+                            <v-toolbar color="indigo" dark>
+                                <v-toolbar-title><v-icon>mdi-car</v-icon> Reservierung am {{focus}}</v-toolbar-title>
+                            </v-toolbar>
+                            <v-card-text>
+                                <v-container pa-0>
+                                    <v-row>
+                                        <v-col cols="6">
+                                            <v-select
+                                                    prepend-icon="mdi-car"
+                                                    :items="['Red Bus', 'White Bus', 'e-Auto', 'Little Red']"
+                                                    label="Auto*"
+                                                    required
+                                            ></v-select>
+                                        </v-col>
+                                        <v-col cols="6">
+                                            <v-text-field
+                                                    prepend-icon="mdi-account"
+                                                    label="Name*"
+                                                    required
+                                            ></v-text-field>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
+                                            <v-time-picker
+                                                    v-model="startTime"
+                                                    color="indigo"
+                                                    :width="272"
+                                                    format="24hr"
+                                            ></v-time-picker>
+                                        </v-col>
+                                        <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
+                                            <v-time-picker
+                                                    v-model="endTime"
+                                                    color="indigo"
+                                                    :width="272"
+                                                    format="24hr"
+                                                    :min="startTime"
+                                            ></v-time-picker>
+                                        </v-col>
+                                    </v-row>
+                                </v-container>
+                            </v-card-text>
+                            <v-card-actions class="mr-2 pb-4 pt-0">
+                                <v-spacer></v-spacer>
+                                <v-btn @click="showAddEventForm = false">Abbrechen</v-btn>
+                                <v-btn @click="showAddEventForm = false">Anfragen</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+                </v-row>
             </v-sheet>
         </v-col>
     </v-row>
 </template>
 
 <script>
-    import FormAddEvent from "./FormAddEvent";
-
     export default {
-        components: {FormAddEvent},
-        comments: {
-            FormAddEvent
-        },
         computed: {
             title() {
                 const {start, end} = this
@@ -149,10 +202,17 @@
             },
         },
         methods: {
+            roundMinutes(hour, minute){
+                const m = (((minute + 7.5)/15 | 0) * 15) % 60
+                const h = ((((minute/105) + .5) | 0) + hour) % 24
+                return h + ':' + m
+            },
             addEvent(time){
-
                 // eslint-disable-next-line
                 console.log(time)
+                this.focus = time.date
+                this.startTime = this.roundMinutes(time.hour,time.minute)
+                this.time = time
                 this.showAddEventForm = true
             },
             viewDay({date}) {
@@ -197,149 +257,59 @@
                     ? 'th'
                     : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][d % 10]
             },
+            formatDate(date) {
+                let month = '' + (date.getMonth() + 1),
+                    day = '' + date.getDate(),
+                    year = date.getFullYear();
+
+                if (month.length < 2) month = '0' + month;
+                if (day.length < 2) day = '0' + day;
+
+                return [year, month, day].join('-');
+            }
         },
-        data: () => ({
-            showAddEventForm: false,
-            today: '2019-01-08',
-            focus: '2019-01-08',
-            type: 'month',
-            typeToLabel: {
-                month: 'Month',
-                week: 'Week',
-                day: 'Day',
-                '4day': '4 Days',
-            },
-            start: null,
-            end: null,
-            selectedEvent: {},
-            selectedElement: null,
-            selectedOpen: false,
-            events: [
-                {
-                    name: 'Vacation',
-                    details: 'Going to the beach!',
-                    start: '2018-12-29',
-                    end: '2019-01-01',
-                    color: 'blue',
+        data() {
+            return {
+                showAddEventForm: false,
+                startTime: '12:00',
+                endTime: null,
+                time: null,
+                today: this.formatDate(new Date()),
+                focus: this.today,
+                type: '4day',
+                typeToLabel: {
+                    month: 'Month',
+                    week: 'Week',
+                    day: 'Day',
+                    '4day': '4 Days',
                 },
-                {
-                    name: 'Meeting',
-                    details: 'Spending time on how we do not have enough time',
-                    start: '2019-01-07 09:00',
-                    end: '2019-01-07 09:30',
-                    color: 'indigo',
-                },
-                {
-                    name: 'Large Event',
-                    details: 'This starts in the middle of an event and spans over multiple events',
-                    start: '2018-12-31',
-                    end: '2019-01-04',
-                    color: 'deep-purple',
-                },
-                {
-                    name: '3rd to 7th',
-                    details: 'Testing',
-                    start: '2019-01-03',
-                    end: '2019-01-07',
-                    color: 'cyan',
-                },
-                {
-                    name: 'Big Meeting',
-                    details: 'A very important meeting about nothing',
-                    start: '2019-01-07 08:00',
-                    end: '2019-01-07 11:30',
-                    color: 'red',
-                },
-                {
-                    name: 'Another Meeting',
-                    details: 'Another important meeting about nothing',
-                    start: '2019-01-07 10:00',
-                    end: '2019-01-07 13:30',
-                    color: 'brown',
-                },
-                {
-                    name: '7th to 8th',
-                    start: '2019-01-07',
-                    end: '2019-01-08',
-                    color: 'blue',
-                },
-                {
-                    name: 'Lunch',
-                    details: 'Time to feed',
-                    start: '2019-01-07 12:00',
-                    end: '2019-01-07 15:00',
-                    color: 'deep-orange',
-                },
-                {
-                    name: '30th Birthday',
-                    details: 'Celebrate responsibly',
-                    start: '2019-01-03',
-                    color: 'teal',
-                },
-                {
-                    name: 'New Year',
-                    details: 'Eat chocolate until you pass out',
-                    start: '2019-01-01',
-                    end: '2019-01-02',
-                    color: 'green',
-                },
-                {
-                    name: 'Conference',
-                    details: 'The best time of my life',
-                    start: '2019-01-21',
-                    end: '2019-01-28',
-                    color: 'grey darken-1',
-                },
-                {
-                    name: 'Hackathon',
-                    details: 'Code like there is no tommorrow',
-                    start: '2019-01-30 23:00',
-                    end: '2019-02-01 08:00',
-                    color: 'black',
-                },
-                {
-                    name: 'event 1',
-                    start: '2019-01-14 18:00',
-                    end: '2019-01-14 19:00',
-                    color: '#4285F4',
-                },
-                {
-                    name: 'event 2',
-                    start: '2019-01-14 18:00',
-                    end: '2019-01-14 19:00',
-                    color: '#4285F4',
-                },
-                {
-                    name: 'event 5',
-                    start: '2019-01-14 18:00',
-                    end: '2019-01-14 19:00',
-                    color: '#4285F4',
-                },
-                {
-                    name: 'event 3',
-                    start: '2019-01-14 18:30',
-                    end: '2019-01-14 20:30',
-                    color: '#4285F4',
-                },
-                {
-                    name: 'event 4',
-                    start: '2019-01-14 19:00',
-                    end: '2019-01-14 20:00',
-                    color: '#4285F4',
-                },
-                {
-                    name: 'event 6',
-                    start: '2019-01-14 21:00',
-                    end: '2019-01-14 23:00',
-                    color: '#4285F4',
-                },
-                {
-                    name: 'event 7',
-                    start: '2019-01-14 22:00',
-                    end: '2019-01-14 23:00',
-                    color: '#4285F4',
-                },
-            ],
-        })
+                selectedEvent: {},
+                selectedElement: null,
+                selectedOpen: false,
+                events: [
+                    {
+                        name: 'Vacation',
+                        details: 'Going to the beach!',
+                        start: '2019-08-17',
+                        end: '2019-08-18',
+                        color: 'blue',
+                    },
+                    {
+                        name: 'Meeting',
+                        details: 'Spending time on how we do not have enough time',
+                        start: '2019-08-17 09:00',
+                        end: '2019-08-17 09:30',
+                        color: 'indigo',
+                    },
+                    {
+                        name: 'Big Meeting',
+                        details: 'A very important meeting about nothing',
+                        start: '2019-08-19 08:00',
+                        end: '2019-08-19 11:30',
+                        color: 'red',
+                    }
+                ],
+            }
+        }
     }
 </script>
