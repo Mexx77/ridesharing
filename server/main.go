@@ -1,14 +1,71 @@
 package main
 
 import (
+    "./logging"
     "database/sql"
     "fmt"
     _ "github.com/mattn/go-sqlite3"
+    "net/http"
     "time"
 )
 
+const RECORDS_URI = "/records"
+
 func main() {
-    db, err := sql.Open("sqlite3", "./foo.db")
+
+    logging.Init()
+    logging.Info.Print("This is ridesharing!")
+
+    server := NewServer()
+    server.startHttpServer()
+}
+
+type Server struct {
+    database *sql.DB
+}
+
+func NewServer() *Server {
+    db, err := sql.Open("sqlite3", "./sqlite.db")
+    checkErr(err)
+    return &Server{
+        database: db,
+    }
+}
+
+func (server *Server) startHttpServer() {
+    port := ":8080"
+    srv := &http.Server{
+        Addr: port,
+        ErrorLog: logging.Error,
+    }
+
+    // routes
+    http.HandleFunc(RECORDS_URI, server.recordsHandler)
+
+    logging.Info.Print("Starting insecure http server on port ", port)
+    if err := srv.ListenAndServe(); err != nil {
+        panic(err)
+    }
+
+}
+
+func (server *Server) recordsHandler(w http.ResponseWriter, r *http.Request) {{
+    rows, err := server.database.Query("SELECT * FROM userinfo")
+    checkErr(err)
+    var uid int
+    var username string
+    var department string
+    var created time.Time
+
+    for rows.Next() {
+        err = rows.Scan(&uid, &username, &department, &created)
+        checkErr(err)
+        fmt.Fprintf(w, "username is %s",username)
+    }
+}}
+
+func test() {
+    db, err := sql.Open("sqlite3", "./sqlite.db")
     checkErr(err)
 
     // insert
@@ -66,7 +123,6 @@ func main() {
     //fmt.Println(affect)
 
     db.Close()
-
 }
 
 func checkErr(err error) {
