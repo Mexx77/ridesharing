@@ -213,16 +213,16 @@
             },
         },
         methods: {
-            roundMinutes(hour, minute){
-                const m = (((minute + 7.5)/15 | 0) * 15) % 60
-                const h = ((((minute/105) + .5) | 0) + hour) % 24
+            roundMinutes(hour, minute) {
+                const m = (((minute + 7.5) / 15 | 0) * 15) % 60
+                const h = ((((minute / 105) + .5) | 0) + hour) % 24
                 return h + ':' + m
             },
-            addEvent(time){
+            addEvent(time) {
                 // eslint-disable-next-line
                 console.log(time)
                 this.focus = time.date
-                this.startTime = this.roundMinutes(time.hour,time.minute)
+                this.startTime = this.roundMinutes(time.hour, time.minute)
                 this.time = time
                 this.showAddEventForm = true
             },
