@@ -52,12 +52,14 @@ type ride struct {
 	CarId       int    `json:"carId"`
 	Destination string `json:"destination"`
 	Start       string `json:"start"`
+	End 		string `json:"end"`
+	Name 		string `json:"name"`
 }
 
 func (s *server) ridesHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rows, err := s.database.Query("" +
-			"SELECT driver, carName, car, destination, start FROM rides " +
+			"SELECT driver, carName, car, destination, start, end FROM rides " +
 			"JOIN cars on rides.car = cars.id")
 		if err != nil {
 			panic(err)
@@ -66,10 +68,11 @@ func (s *server) ridesHandler() http.HandlerFunc {
 		var rides []ride
 		for rows.Next() {
 			ride := ride{}
-			err = rows.Scan(&ride.Driver, &ride.CarName, &ride.CarId, &ride.Destination, &ride.Start)
+			err = rows.Scan(&ride.Driver, &ride.CarName, &ride.CarId, &ride.Destination, &ride.Start, &ride.End)
 			if err != nil {
 				panic(err)
 			}
+			ride.Name = ride.Driver + " rides to " + ride.Destination
 			rides = append(rides, ride)
 		}
 		rideJson, _ := json.Marshal(rides)
