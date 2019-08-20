@@ -231,7 +231,8 @@
                 this.type = 'day'
             },
             getEventColor(event) {
-                return event.color
+                return 'indigo'
+                //return event.color
             },
             setToday() {
                 this.focus = this.today
