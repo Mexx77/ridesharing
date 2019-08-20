@@ -58,6 +58,7 @@ type ride struct {
 
 func (s *server) ridesHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		rows, err := s.database.Query("" +
 			"SELECT driver, carName, car, destination, start, end FROM rides " +
 			"JOIN cars on rides.car = cars.id")
