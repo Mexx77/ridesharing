@@ -125,9 +125,17 @@
                                         <v-col cols="6">
                                             <v-text-field
                                                     prepend-icon="mdi-account"
-                                                    label="Name*"
+                                                    label="Name des Fahrers*"
                                                     required
                                             ></v-text-field>
+                                        </v-col>
+                                        <v-col cols="6">
+                                            <v-combobox
+                                                    prepend-icon="mdi-city"
+                                                    :items="['Lüneburg', 'Dannenberg', 'Hitzacker']"
+                                                    label="Fahrtziel*"
+                                                    required
+                                            ></v-combobox>
                                         </v-col>
                                     </v-row>
                                     <v-row>
