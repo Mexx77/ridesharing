@@ -280,6 +280,12 @@
                 return [year, month, day].join('-');
             }
         },
+        mounted: function() {
+            this.$http.get('http://localhost:8080/rides')
+                .then((response) => {
+                    this.events = response.data;
+                });
+        },
         data() {
             return {
                 showAddEventForm: false,
@@ -300,25 +306,11 @@
                 selectedOpen: false,
                 events: [
                     {
-                        name: 'Vacation',
-                        details: 'Going to the beach!',
-                        start: '2019-08-17',
-                        end: '2019-08-18',
-                        color: 'blue',
-                    },
-                    {
                         name: 'Meeting',
                         details: 'Spending time on how we do not have enough time',
                         start: '2019-08-17 09:00',
                         end: '2019-08-17 09:30',
                         color: 'indigo',
-                    },
-                    {
-                        name: 'Big Meeting',
-                        details: 'A very important meeting about nothing',
-                        start: '2019-08-19 08:00',
-                        end: '2019-08-19 11:30',
-                        color: 'red',
                     }
                 ],
             }
