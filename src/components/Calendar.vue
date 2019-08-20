@@ -109,7 +109,10 @@
                     >
                         <v-card>
                             <v-toolbar color="indigo" dark>
-                                <v-toolbar-title><v-icon>mdi-car</v-icon> Reservierung am {{focus}}</v-toolbar-title>
+                                <v-toolbar-title>
+                                    <v-icon>mdi-car</v-icon>
+                                    Reservierung am {{focus}}
+                                </v-toolbar-title>
                             </v-toolbar>
                             <v-card-text>
                                 <v-container pa-0>
