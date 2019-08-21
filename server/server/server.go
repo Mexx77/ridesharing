@@ -50,6 +50,7 @@ type ride struct {
 	Driver      string `json:"driver"`
 	CarName     string `json:"carName"`
 	CarId       int    `json:"carId"`
+	CarColor    string `json:"carColor"`
 	Destination string `json:"destination"`
 	Start       string `json:"start"`
 	End 		string `json:"end"`
@@ -60,7 +61,7 @@ func (s *server) ridesHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		rows, err := s.database.Query("" +
-			"SELECT driver, carName, car, destination, start, end FROM rides " +
+			"SELECT driver, carName, car, carColor, destination, start, end FROM rides " +
 			"JOIN cars on rides.car = cars.id")
 		if err != nil {
 			panic(err)
@@ -69,7 +70,7 @@ func (s *server) ridesHandler() http.HandlerFunc {
 		var rides []ride
 		for rows.Next() {
 			ride := ride{}
-			err = rows.Scan(&ride.Driver, &ride.CarName, &ride.CarId, &ride.Destination, &ride.Start, &ride.End)
+			err = rows.Scan(&ride.Driver, &ride.CarName, &ride.CarId, &ride.CarColor, &ride.Destination, &ride.Start, &ride.End)
 			if err != nil {
 				panic(err)
 			}

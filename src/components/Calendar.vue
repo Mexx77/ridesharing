@@ -48,7 +48,9 @@
                         color="primary"
                         :events="events"
                         :event-color="getEventColor"
+                        :event-text-color="(e) => {e.carColor == 'white' ? 'black' : 'white'}"
                         :event-margin-bottom="3"
+                        :event-overlap-threshold=1000
                         :now="today"
                         :type="type"
                         :first-interval="7"
@@ -72,8 +74,8 @@
                             flat
                     >
                         <v-toolbar
-                                :color="selectedEvent.color"
-                                dark
+                                :color="selectedEvent.carColor"
+                                :style="{color: selectedEvent.getEventTextColor}"
                         >
                             <v-btn icon small>
                                 <v-icon>mdi-pencil</v-icon>
@@ -108,7 +110,7 @@
                             hide-overlay max-width="600px"
                     >
                         <v-card>
-                            <v-toolbar color="indigo" dark>
+                            <v-toolbar color="primary" dark>
                                 <v-toolbar-title>
                                     <v-icon>mdi-car</v-icon>
                                     Reservierung am {{focus}}
@@ -145,7 +147,7 @@
                                         <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                             <v-time-picker
                                                     v-model="startTime"
-                                                    color="indigo"
+                                                    color="primary"
                                                     :width="272"
                                                     format="24hr"
                                             ></v-time-picker>
@@ -153,7 +155,7 @@
                                         <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                             <v-time-picker
                                                     v-model="endTime"
-                                                    color="indigo"
+                                                    color="primary"
                                                     :width="272"
                                                     format="24hr"
                                                     :min="startTime"
@@ -231,8 +233,10 @@
                 this.type = 'day'
             },
             getEventColor(event) {
-                return 'indigo'
-                //return event.color
+                return event.carColor
+            },
+            getEventTextColor(event) {
+                return event.carColor == 'white' ? 'secondary' : 'white'
             },
             setToday() {
                 this.focus = this.today
@@ -310,7 +314,7 @@
                         details: 'Spending time on how we do not have enough time',
                         start: '2019-08-17 09:00',
                         end: '2019-08-17 09:30',
-                        color: 'indigo',
+                        carColor: 'indigo',
                     }
                 ],
             }
