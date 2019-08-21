@@ -48,7 +48,7 @@
                         color="primary"
                         :events="events"
                         :event-color="getEventColor"
-                        :event-text-color="(e) => {e.carColor == 'white' ? 'black' : 'white'}"
+                        :event-text-color="getEventTextColor"
                         :event-margin-bottom="3"
                         :event-overlap-threshold=1000
                         :now="today"
@@ -74,7 +74,7 @@
                             flat
                     >
                         <v-toolbar
-                                :color="selectedEvent.carColor"
+                                :color="selectedEvent.getEventColor"
                                 :style="{color: selectedEvent.getEventTextColor}"
                         >
                             <v-btn icon small>
@@ -112,21 +112,13 @@
                         <v-card>
                             <v-toolbar color="primary" dark>
                                 <v-toolbar-title>
-                                    <v-icon>mdi-car</v-icon>
-                                    Reservierung am {{focus}}
+                                    <v-icon class="pb-1">mdi-car</v-icon>
+                                    Reservierung am {{germanDate}}
                                 </v-toolbar-title>
                             </v-toolbar>
                             <v-card-text>
                                 <v-container pa-0>
                                     <v-row>
-                                        <v-col cols="6">
-                                            <v-select
-                                                    prepend-icon="mdi-car"
-                                                    :items="['Red Bus', 'White Bus', 'e-Auto', 'Little Red']"
-                                                    label="Auto*"
-                                                    required
-                                            ></v-select>
-                                        </v-col>
                                         <v-col cols="6">
                                             <v-text-field
                                                     prepend-icon="mdi-account"
@@ -166,6 +158,8 @@
                             </v-card-text>
                             <v-card-actions class="mr-2 pb-4 pt-0">
                                 <v-spacer></v-spacer>
+                                <v-switch class="mr-2" v-model="bigCarNeeded"
+                                          label="Ich brauche ein großes Auto"></v-switch>
                                 <v-btn @click="showAddEventForm = false">Abbrechen</v-btn>
                                 <v-btn @click="showAddEventForm = false">Anfragen</v-btn>
                             </v-card-actions>
@@ -213,6 +207,11 @@
                     timeZone: 'UTC', month: 'long',
                 })
             },
+            germanDate() {
+                if (this.focus == undefined) return undefined
+                const p = this.focus.split(/\D/g)
+                return [p[2], p[1], p[0]].join(".")
+            }
         },
         methods: {
             roundMinutes(hour, minute) {
@@ -221,8 +220,6 @@
                 return h + ':' + m
             },
             addEvent(time) {
-                // eslint-disable-next-line
-                console.log(time)
                 this.focus = time.date
                 this.startTime = this.roundMinutes(time.hour, time.minute)
                 this.time = time
@@ -284,14 +281,15 @@
                 return [year, month, day].join('-');
             }
         },
-        mounted: function() {
-            this.$http.get('http://localhost:8080/rides')
+        mounted: function () {
+            this.$http.get('https://ridesharing-0df0.restdb.io/rest/rides')
                 .then((response) => {
-                    this.events = response.data;
+                    this.events = response.data
                 });
         },
         data() {
             return {
+                bigCarNeeded: false,
                 showAddEventForm: false,
                 startTime: '12:00',
                 endTime: null,
@@ -308,15 +306,7 @@
                 selectedEvent: {},
                 selectedElement: null,
                 selectedOpen: false,
-                events: [
-                    {
-                        name: 'Meeting',
-                        details: 'Spending time on how we do not have enough time',
-                        start: '2019-08-17 09:00',
-                        end: '2019-08-17 09:30',
-                        carColor: 'indigo',
-                    }
-                ],
+                events: []
             }
         }
     }
