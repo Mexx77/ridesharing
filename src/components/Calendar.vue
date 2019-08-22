@@ -41,7 +41,7 @@
                     </v-menu>
                 </v-toolbar>
             </v-sheet>
-            <v-sheet height="600">
+            <v-sheet>
                 <v-calendar
                         ref="calendar"
                         v-model="focus"
@@ -116,13 +116,13 @@
                                     Reservierung am {{germanDate}}
                                 </v-toolbar-title>
                             </v-toolbar>
-                            <v-card-text>
+                            <v-card-text class="pb-0">
                                 <v-container pa-0>
                                     <v-row>
                                         <v-col cols="6">
                                             <v-text-field
                                                     prepend-icon="mdi-account"
-                                                    label="Name des Fahrers*"
+                                                    label="Fahrer*"
                                                     required
                                             ></v-text-field>
                                         </v-col>
@@ -157,11 +157,17 @@
                                 </v-container>
                             </v-card-text>
                             <v-card-actions class="mr-2 pb-4 pt-0">
-                                <v-spacer></v-spacer>
-                                <v-switch class="mr-2" v-model="bigCarNeeded"
-                                          label="Ich brauche ein großes Auto"></v-switch>
-                                <v-btn @click="showAddEventForm = false">Abbrechen</v-btn>
-                                <v-btn @click="showAddEventForm = false">Anfragen</v-btn>
+                                <v-container>
+                                    <v-row dense>
+                                        <v-col>
+                                            <v-switch v-model="bigCarNeeded"
+                                                      label="Ich brauche ein großes Auto"></v-switch>
+                                            <v-btn @click="showAddEventForm = false">Abbrechen</v-btn>
+                                            <v-btn @click="showAddEventForm = false">Anfragen</v-btn>
+                                        </v-col>
+                                    </v-row>
+                                </v-container>
+
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -313,3 +319,9 @@
         }
     }
 </script>
+
+<style>
+    .v-event-timed {
+        font-size: 16px !important;
+    }
+</style>
