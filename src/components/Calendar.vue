@@ -282,7 +282,9 @@
             }
         },
         mounted: function () {
-            this.$http.get('https://ridesharing-0df0.restdb.io/rest/rides')
+            this.$http
+                //.get('https://ridesharing-0df0.restdb.io/rest/rides')
+                .get('http://localhost:8090/rides')
                 .then((response) => {
                     this.events = response.data
                 });
