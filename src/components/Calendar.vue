@@ -4,7 +4,7 @@
             <v-sheet height="64">
                 <v-toolbar flat color="white">
                     <v-btn outlined class="mr-4" @click="setToday">
-                        Today
+                        Heute
                     </v-btn>
                     <v-btn fab text small @click="prev">
                         <v-icon>mdi-chevron-left</v-icon>
@@ -26,16 +26,16 @@
                         </template>
                         <v-list>
                             <v-list-item @click="type = 'day'">
-                                <v-list-item-title>Day</v-list-item-title>
+                                <v-list-item-title>Tag</v-list-item-title>
                             </v-list-item>
                             <v-list-item @click="type = 'week'">
-                                <v-list-item-title>Week</v-list-item-title>
+                                <v-list-item-title>Woche</v-list-item-title>
                             </v-list-item>
                             <v-list-item @click="type = 'month'">
-                                <v-list-item-title>Month</v-list-item-title>
+                                <v-list-item-title>Monat</v-list-item-title>
                             </v-list-item>
                             <v-list-item @click="type = '4day'">
-                                <v-list-item-title>4 days</v-list-item-title>
+                                <v-list-item-title>4 Tage</v-list-item-title>
                             </v-list-item>
                         </v-list>
                     </v-menu>
@@ -50,7 +50,7 @@
                         :event-color="getEventColor"
                         :event-text-color="getEventTextColor"
                         :event-margin-bottom="3"
-                        :event-overlap-threshold=1000
+                        :event-overlap-threshold=60
                         :now="today"
                         :type="type"
                         :first-interval="7"
@@ -304,12 +304,12 @@
                 time: null,
                 today: this.formatDate(new Date()),
                 focus: this.today,
-                type: '4day',
+                type: this.$vuetify.breakpoint.smAndDown ? 'day' : '4day',
                 typeToLabel: {
-                    month: 'Month',
-                    week: 'Week',
-                    day: 'Day',
-                    '4day': '4 Days',
+                    month: 'Monat',
+                    week: 'Woche',
+                    day: 'Tag',
+                    '4day': '4 Tage',
                 },
                 selectedEvent: {},
                 selectedElement: null,

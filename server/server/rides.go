@@ -35,7 +35,7 @@ func (s *server) ridesHandler() http.HandlerFunc {
 			if err != nil {
 				panic(err)
 			}
-			ride.Name = ride.Driver + " rides to " + ride.Destination
+			ride.Name = ride.Driver + " ↦ " + ride.Destination
 			rides = append(rides, ride)
 		}
 		rideJson, _ := json.Marshal(rides)
