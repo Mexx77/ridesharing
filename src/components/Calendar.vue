@@ -109,67 +109,81 @@
                             :fullscreen="$vuetify.breakpoint.smAndDown ? true : false"
                             hide-overlay max-width="600px"
                     >
-                        <v-card>
-                            <v-toolbar color="primary" dark>
-                                <v-toolbar-title>
-                                    <v-icon class="pb-1">mdi-car</v-icon>
-                                    Reservierung am {{germanDate}}
-                                </v-toolbar-title>
-                            </v-toolbar>
-                            <v-card-text class="pb-0">
-                                <v-container pa-0>
-                                    <v-row>
-                                        <v-col cols="6">
-                                            <v-text-field
-                                                    prepend-icon="mdi-account"
-                                                    label="Fahrer*"
-                                                    required
-                                            ></v-text-field>
-                                        </v-col>
-                                        <v-col cols="6">
-                                            <v-combobox
-                                                    prepend-icon="mdi-city"
-                                                    :items="['Lüneburg', 'Dannenberg', 'Hitzacker']"
-                                                    label="Fahrtziel*"
-                                                    required
-                                            ></v-combobox>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
-                                            <v-time-picker
-                                                    v-model="startTime"
-                                                    color="primary"
-                                                    :width="272"
-                                                    format="24hr"
-                                            ></v-time-picker>
-                                        </v-col>
-                                        <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
-                                            <v-time-picker
-                                                    v-model="endTime"
-                                                    color="primary"
-                                                    :width="272"
-                                                    format="24hr"
-                                                    :min="startTime"
-                                            ></v-time-picker>
-                                        </v-col>
-                                    </v-row>
-                                </v-container>
-                            </v-card-text>
-                            <v-card-actions class="mr-2 pb-4 pt-0">
-                                <v-container>
-                                    <v-row dense>
-                                        <v-col>
-                                            <v-switch v-model="bigCarNeeded"
-                                                      label="Ich brauche ein großes Auto"></v-switch>
-                                            <v-btn @click="showAddEventForm = false">Abbrechen</v-btn>
-                                            <v-btn @click="showAddEventForm = false">Anfragen</v-btn>
-                                        </v-col>
-                                    </v-row>
-                                </v-container>
+                        <v-form
+                                ref="form"
+                                v-model="formIsValid"
+                                lazy-validation
+                        >
+                            <v-card>
+                                <v-toolbar color="primary" dark>
+                                    <v-toolbar-title>
+                                        <v-icon class="pb-1">mdi-car</v-icon>
+                                        Reservierung am {{germanDate}}
+                                    </v-toolbar-title>
+                                </v-toolbar>
+                                <v-card-text class="pb-0">
+                                    <v-container pa-0>
+                                        <v-row>
+                                            <v-col cols="6">
+                                                <v-text-field
+                                                        v-model="driver"
+                                                        prepend-icon="mdi-account"
+                                                        label="Fahrer*"
+                                                        :rules="[v => !!v || 'Name des Fahrer benötigt']"
+                                                        required
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="6">
+                                                <v-combobox
+                                                        v-model="destination"
+                                                        prepend-icon="mdi-city"
+                                                        :items="['Lüneburg', 'Dannenberg', 'Hitzacker']"
+                                                        label="Fahrtziel*"
+                                                        :rules="[v => !!v || 'Fahrtziel benötigt']"
+                                                        required
+                                                ></v-combobox>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row>
+                                            <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
+                                                <v-time-picker
+                                                        v-model="startTime"
+                                                        color="primary"
+                                                        :width="272"
+                                                        format="24hr"
+                                                        :rules="[v => !!v || 'Startzeit benötigt']"
+                                                        required
+                                                ></v-time-picker>
+                                            </v-col>
+                                            <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
+                                                <v-time-picker
+                                                        v-model="endTime"
+                                                        color="primary"
+                                                        :width="272"
+                                                        format="24hr"
+                                                        :min="startTime"
+                                                        :rules="[v => !!v || 'Zeit der Rückgabe benötigt']"
+                                                        required
+                                                ></v-time-picker>
+                                            </v-col>
+                                        </v-row>
+                                    </v-container>
+                                </v-card-text>
+                                <v-card-actions class="mr-2 pb-4 pt-0">
+                                    <v-container>
+                                        <v-row dense>
+                                            <v-col>
+                                                <v-switch v-model="bigCarNeeded"
+                                                          label="Ich brauche ein großes Auto"></v-switch>
+                                                <v-btn @click="validateForm">Abbrechen</v-btn>
+                                                <v-btn @click="showAddEventForm = false">Anfragen</v-btn>
+                                            </v-col>
+                                        </v-row>
+                                    </v-container>
 
-                            </v-card-actions>
-                        </v-card>
+                                </v-card-actions>
+                            </v-card>
+                        </v-form>
                     </v-dialog>
                 </v-row>
             </v-sheet>
@@ -285,6 +299,9 @@
                 if (day.length < 2) day = '0' + day;
 
                 return [year, month, day].join('-');
+            },
+            validateForm() {
+                this.$refs.form.validate()
             }
         },
         mounted: function () {
@@ -297,6 +314,9 @@
         },
         data() {
             return {
+                formIsValid: false,
+                driver: '',
+                destination: '',
                 bigCarNeeded: false,
                 showAddEventForm: false,
                 startTime: '12:00',
