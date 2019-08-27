@@ -153,6 +153,7 @@
                                                         format="24hr"
                                                         :rules="[v => !!v || 'Startzeit benötigt']"
                                                         required
+                                                        :allowed-minutes="allowedMinutes"
                                                 ></v-time-picker>
                                             </v-col>
                                             <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
@@ -164,6 +165,7 @@
                                                         :min="startTime"
                                                         :rules="[v => !!v || 'Zeit der Rückgabe benötigt']"
                                                         required
+                                                        :allowed-minutes="allowedMinutes"
                                                 ></v-time-picker>
                                             </v-col>
                                         </v-row>
@@ -234,6 +236,7 @@
             }
         },
         methods: {
+            allowedMinutes: m => m % 15 === 0,
             roundMinutes(hour, minute) {
                 const m = (((minute + 7.5) / 15 | 0) * 15) % 60
                 const h = ((((minute / 105) + .5) | 0) + hour) % 24
