@@ -129,7 +129,7 @@
                                                         v-model="driver"
                                                         prepend-icon="mdi-account"
                                                         label="Fahrer*"
-                                                        :rules="[v => !!v || 'Name des Fahrer benötigt']"
+                                                        :rules="[v => !!v || 'Name des Fahrers benötigt']"
                                                         required
                                                 ></v-text-field>
                                             </v-col>
