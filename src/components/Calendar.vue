@@ -148,7 +148,7 @@
                                             <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                                 <v-menu
                                                         v-model="menuStartTime"
-                                                        :close-on-content-click="true"
+                                                        :close-on-content-click="false"
                                                         :nudge-right="40"
                                                         transition="scale-transition"
                                                         offset-y
@@ -179,7 +179,7 @@
                                             <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                                 <v-menu
                                                         v-model="menuEndTime"
-                                                        :close-on-content-click="true"
+                                                        :close-on-content-click="false"
                                                         :nudge-right="40"
                                                         transition="scale-transition"
                                                         offset-y
@@ -230,6 +230,7 @@
                         </v-form>
                     </v-dialog>
                 </v-row>
+                <v-snackbar v-model="snackbar" :color="snackbarColor">{{ snackbarText }}</v-snackbar>
             </v-sheet>
         </v-col>
     </v-row>
@@ -278,11 +279,12 @@
             }
         },
         methods: {
-            allowedMinutes: m => m % 15 === 0,
+            allowedMinutes: m => m % 15 == 0,
             roundMinutes(hour, minute) {
                 const m = (((minute + 7.5) / 15 | 0) * 15) % 60
                 const h = ((((minute / 105) + .5) | 0) + hour) % 24
-                return h + ':' + m
+                const twoDigitM = m === 0 ? '00' : m
+                return h + ':' + twoDigitM
             },
             addEvent(time) {
                 this.focus = time.date
@@ -348,14 +350,51 @@
             validateAndSubmitForm() {
                 if (this.$refs.form.validate()) {
                     this.showAddEventForm = false;
-
+                    this.$http
+                        .post(this.$hostname + '/ride', {
+                            driver: this.driver,
+                            destination: this.destination,
+                            start: this.startTime,
+                            end: this.endTime
+                        })
+                        .then(() => {
+                            this.snackbarText = 'Danke, deine Reservierungsanfrage wurde entgegengenommen';
+                            this.snackbarColor = 'success';
+                            this.snackbar = true;
+                        })
+                        .catch((error) => {
+                            // Error 😨
+                            if (error.response) {
+                                /*
+                                 * The request was made and the server responded with a
+                                 * status code that falls out of the range of 2xx
+                                 */
+                                this.snackbarText = 'Ups, der Server hat deine Anfrage verweigert';
+                                this.snackbarColor = 'error';
+                                this.snackbar = true;
+                            } else if (error.request) {
+                                /*
+                                 * The request was made but no response was received, `error.request`
+                                 * is an instance of XMLHttpRequest in the browser and an instance
+                                 * of http.ClientRequest in Node.js
+                                 */
+                                this.snackbarText = 'Ups, keine Antort vom Server erhalten. Netz?';
+                                this.snackbarColor = 'error';
+                                this.snackbar = true;
+                            } else {
+                                // Something happened in setting up the request and triggered an Error
+                                // eslint-disable-next-line
+                                this.snackbarText = 'Ups, konnte die Anfrage nicht schicken :(';
+                                this.snackbarColor = 'error';
+                                this.snackbar = true;
+                            }
+                        });
                 }
             }
         },
         mounted: function () {
             this.$http
-                //.get('https://ridesharing-0df0.restdb.io/rest/rides')
-                .get('http://localhost:8090/rides')
+                .get(this.$hostname + '/rides')
                 .then((response) => {
                     this.events = response.data
                 });
@@ -369,7 +408,7 @@
                 showAddEventForm: false,
                 startTime: '12:00',
                 menuStartTime: false,
-                endTime: null,
+                endTime: '',
                 menuEndTime: false,
                 time: null,
                 today: this.formatDate(new Date()),
@@ -384,7 +423,10 @@
                 selectedEvent: {},
                 selectedElement: null,
                 selectedOpen: false,
-                events: []
+                events: [],
+                snackbar: false,
+                snackbarText: '',
+                snackbarColor: 'success'
             }
         }
     }

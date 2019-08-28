@@ -1,6 +1,8 @@
 package server
 
 import (
+	"../logging"
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -40,6 +42,40 @@ func (s *server) ridesHandler() http.HandlerFunc {
 		}
 		rideJson, _ := json.Marshal(rides)
 		fmt.Fprint(w, string(rideJson))
+	}
+}
+
+func (s *server) rideHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			errorMsg := fmt.Sprintf("Invalid request method %s. POST is allowed only", r.Method)
+			logging.Error.Print(errorMsg)
+			http.Error(w, errorMsg, http.StatusMethodNotAllowed)
+			return
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(r.Body)
+		body := buf.String()
+
+		var payload ride
+		err := json.Unmarshal(buf.Bytes(), &payload)
+		if err != nil {
+			errorMsg := "Cannot decode payload: " + err.Error()
+			logging.Error.Print(errorMsg)
+			if body == "" {
+				logging.Info.Print("[empty Body]")
+			} else {
+				logging.Info.Print(body)
+			}
+
+			http.Error(w, errorMsg, http.StatusBadRequest)
+			return
+		}
+
+		logging.Debug.Println("We got this record:")
+		logging.Debug.Print(body)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 

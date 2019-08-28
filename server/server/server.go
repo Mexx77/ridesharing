@@ -45,7 +45,16 @@ func (s *server) startHttpServer() {
 
 func (s *server) addCORSHeader(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Vary", "Origin")
+		w.Header().Add("Vary", "Access-Control-Request-Method")
+		w.Header().Add("Vary", "Access-Control-Request-Headers")
+		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
+		w.Header().Add("Access-Control-Allow-Methods", "GET, POST,OPTIONS")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		h(w, r)
 	}
 }
