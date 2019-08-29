@@ -297,10 +297,14 @@
                 this.type = 'day'
             },
             getEventColor(event) {
-                return event.carColor
+                return event.carColor.Valid ? event.carColor.String : 'grey';
             },
             getEventTextColor(event) {
-                return event.carColor == 'white' ? 'secondary' : 'white'
+                if (event.carColor.Valid) {
+                    return event.carColor.String === 'white' ? 'secondary' : 'white'
+                } else {
+                    return 'white';
+                }
             },
             setToday() {
                 this.focus = this.today
@@ -354,8 +358,8 @@
                         .post(this.$hostname + '/ride', {
                             driver: this.driver,
                             destination: this.destination,
-                            start: this.startTime,
-                            end: this.endTime
+                            start: `${this.focus}T${this.startTime}:00`,
+                            end: `${this.focus}T${this.endTime}:00`
                         })
                         .then(() => {
                             this.snackbarText = 'Danke, deine Reservierungsanfrage wurde entgegengenommen';

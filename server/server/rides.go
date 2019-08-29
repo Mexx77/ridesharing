@@ -11,21 +11,23 @@ import (
 )
 
 type ride struct {
-	Driver      string `json:"driver"`
-	CarName     string `json:"carName"`
-	CarId       int    `json:"carId"`
-	CarColor    string `json:"carColor"`
-	Destination string `json:"destination"`
-	Start       string `json:"start"`
-	End 		string `json:"end"`
-	Name 		string `json:"name"`
+	Driver       string         `json:"driver"`
+	CarName      sql.NullString `json:"carName"`
+	CarId        sql.NullInt64  `json:"carId"`
+	CarColor     sql.NullString `json:"carColor"`
+	Destination  string         `json:"destination"`
+	Start        string         `json:"start"`
+	End          string         `json:"end"`
+	Confirmed    bool           `json:"confirmed"`
+	BigCarNeeded bool           `json:"bigCarNeeded"`
+	Name         string         `json:"name"`
 }
 
 func (s *server) ridesHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rows, err := s.database.Query("" +
-			"SELECT driver, carName, car, carColor, destination, start, end FROM rides " +
-			"JOIN cars on rides.car = cars.id")
+			"SELECT driver, carName, car, carColor, destination, start, end, confirmed, bigCarNeeded FROM rides " +
+			"LEFT JOIN cars on rides.car = cars.id")
 		if err != nil {
 			panic(err)
 		}
@@ -33,7 +35,16 @@ func (s *server) ridesHandler() http.HandlerFunc {
 		var rides []ride
 		for rows.Next() {
 			ride := ride{}
-			err = rows.Scan(&ride.Driver, &ride.CarName, &ride.CarId, &ride.CarColor, &ride.Destination, &ride.Start, &ride.End)
+			err = rows.Scan(
+				&ride.Driver,
+				&ride.CarName,
+				&ride.CarId,
+				&ride.CarColor,
+				&ride.Destination,
+				&ride.Start,
+				&ride.End,
+				&ride.Confirmed,
+				&ride.BigCarNeeded)
 			if err != nil {
 				panic(err)
 			}
@@ -71,6 +82,17 @@ func (s *server) rideHandler() http.HandlerFunc {
 
 			http.Error(w, errorMsg, http.StatusBadRequest)
 			return
+		}
+
+		stmt, err := s.database.Prepare("INSERT INTO rides(driver, destination, start, end, bigCarNeeded)" +
+			" values(?,?,?,?,?)")
+		if err != nil {
+			panic(err)
+		}
+
+		_, err = stmt.Exec(payload.Driver, payload.Destination, payload.Start, payload.End, payload.BigCarNeeded)
+		if err != nil {
+			panic(err)
 		}
 
 		logging.Debug.Println("We got this record:")
