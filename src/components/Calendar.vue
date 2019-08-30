@@ -279,6 +279,22 @@
             }
         },
         methods: {
+            fourDaysFromNow() {
+                return this.dateAddDays(this.today, 3)
+            },
+            dateAddDays(dateStr, nDays){
+                let date =  new Date(dateStr);
+                date.setDate(date.getDate() + nDays || 1);
+                return [
+                    date.getFullYear(),
+                    this.zeroPad(date.getMonth()+1, 10),
+                    this.zeroPad(date.getDate(), 10)
+                ].join('-');
+            },
+            zeroPad(nr, base){
+                const len = (String(base).length - String(nr).length) + 1;
+                return len > 0? new Array(len).join('0') + nr : nr;
+            },
             allowedMinutes: m => m % 15 == 0,
             roundMinutes(hour, minute) {
                 const m = (((minute + 7.5) / 15 | 0) * 15) % 60
@@ -332,9 +348,11 @@
                 nativeEvent.stopPropagation()
             },
             updateRange({start, end}) {
-                // You could load events from an outside source (like database) now that we have the start and end dates on the calendar
-                this.start = start
-                this.end = end
+                this.$http
+                    .get(this.$hostname + '/rides?start=' + start.date + '&end=' + end.date)
+                    .then((response) => {
+                        this.events = response.data
+                    });
             },
             nth(d) {
                 return d > 3 && d < 21
@@ -359,7 +377,8 @@
                             driver: this.driver,
                             destination: this.destination,
                             start: `${this.focus}T${this.startTime}:00`,
-                            end: `${this.focus}T${this.endTime}:00`
+                            end: `${this.focus}T${this.endTime}:00`,
+                            bigCarNeeded: this.bigCarNeeded
                         })
                         .then(() => {
                             this.snackbarText = 'Danke, deine Reservierungsanfrage wurde entgegengenommen';
@@ -398,7 +417,7 @@
         },
         mounted: function () {
             this.$http
-                .get(this.$hostname + '/rides')
+                .get(this.$hostname + '/rides?start=' + this.today  + '&end=' + this.fourDaysFromNow() )
                 .then((response) => {
                     this.events = response.data
                 });

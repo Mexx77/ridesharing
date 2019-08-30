@@ -25,14 +25,34 @@ type ride struct {
 
 func (s *server) ridesHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rows, err := s.database.Query("" +
+
+		start := r.URL.Query().Get("start")
+		if len(start) == 0 {
+			start = "1970-01-01"
+		} else {
+			start = start + "T00:00:00"
+		}
+		end := r.URL.Query().Get("end")
+		if len(end) == 0 {
+			end = "9999-12-31"
+		}else {
+			end = end + "T23:59:59"
+		}
+
+		stmt, err := s.database.Prepare("" +
 			"SELECT driver, carName, car, carColor, destination, start, end, confirmed, bigCarNeeded FROM rides " +
-			"LEFT JOIN cars on rides.car = cars.id")
+			"LEFT JOIN cars on rides.car = cars.id where start > ? AND start < ?")
+		if err != nil {
+			panic(err)
+		}
+		defer stmt.Close()
+
+		rows, err := stmt.Query(start,end)
 		if err != nil {
 			panic(err)
 		}
 
-		var rides []ride
+		rides := make([]ride, 0)
 		for rows.Next() {
 			ride := ride{}
 			err = rows.Scan(
