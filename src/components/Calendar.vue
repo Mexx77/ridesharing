@@ -152,10 +152,10 @@
             },
             focus: {
                 get () {
-                    return this.$store.state.focus
+                    return this.$store.state.rides.focus
                 },
                 set (value) {
-                    this.$store.commit('setFocus', value)
+                    this.$store.commit('rides/setFocus', value)
                 }
             }
         },
@@ -184,9 +184,9 @@
             },
             addEvent(time) {
                 this.focus = time.date
-                this.$store.commit('setStartTime', this.roundMinutes(time.hour, time.minute))
+                this.$store.commit('rides/setStartTime', this.roundMinutes(time.hour, time.minute))
                 this.time = time
-                this.$store.commit('setShowAddEventForm', true)
+                this.$store.commit('rides/setShowAddEventForm', true)
             },
             viewDay({date}) {
                 this.focus = date

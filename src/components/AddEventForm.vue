@@ -146,7 +146,7 @@
         },
         computed: {
             focus () {
-                return this.$store.state.focus
+                return this.$store.state.rides.focus
             },
             germanDate() {
                 if (this.focus == undefined) return undefined
@@ -155,26 +155,26 @@
             },
             startTime: {
                 get () {
-                    return this.$store.state.startTime
+                    return this.$store.state.rides.startTime
                 },
                 set (value) {
-                    this.$store.commit('setStartTime', value)
+                    this.$store.commit('rides/setStartTime', value)
                 }
             },
             endTime: {
                 get () {
-                    return this.$store.state.endTime
+                    return this.$store.state.rides.endTime
                 },
                 set (value) {
-                    this.$store.commit('setEndTime', value)
+                    this.$store.commit('rides/setEndTime', value)
                 }
             },
             showAddEventForm: {
                 get () {
-                    return this.$store.state.showAddEventForm
+                    return this.$store.state.rides.showAddEventForm
                 },
                 set (value) {
-                    this.$store.commit('setShowAddEventForm', value)
+                    this.$store.commit('rides/setShowAddEventForm', value)
                 }
             }
         },
