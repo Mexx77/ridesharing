@@ -2,7 +2,7 @@
   <v-app>
     <v-app-bar app>
       <v-toolbar-title class="headline text-uppercase">
-        <span>Sammatz </span>
+        <span v-if="$vuetify.breakpoint.mdAndUp">Sammatz </span>
         <span class="font-weight-light">RIDESHARING</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>

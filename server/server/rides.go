@@ -43,13 +43,13 @@ func (s *server) ridesHandler() http.HandlerFunc {
 			"SELECT driver, carName, car, carColor, destination, start, end, confirmed, bigCarNeeded FROM rides " +
 			"LEFT JOIN cars on rides.car = cars.id where start > ? AND start < ?")
 		if err != nil {
-			panic(err)
+			logging.Error.Print(err)
 		}
 		defer stmt.Close()
 
 		rows, err := stmt.Query(start,end)
 		if err != nil {
-			panic(err)
+			logging.Error.Print(err)
 		}
 
 		rides := make([]ride, 0)
@@ -66,7 +66,7 @@ func (s *server) ridesHandler() http.HandlerFunc {
 				&ride.Confirmed,
 				&ride.BigCarNeeded)
 			if err != nil {
-				panic(err)
+				logging.Error.Print(err)
 			}
 			ride.Name = ride.Driver + " ↦ " + ride.Destination
 			rides = append(rides, ride)
@@ -107,12 +107,12 @@ func (s *server) rideHandler() http.HandlerFunc {
 		stmt, err := s.database.Prepare("INSERT INTO rides(driver, destination, start, end, bigCarNeeded)" +
 			" values(?,?,?,?,?)")
 		if err != nil {
-			panic(err)
+			logging.Error.Print(err)
 		}
 
 		_, err = stmt.Exec(payload.Driver, payload.Destination, payload.Start, payload.End, payload.BigCarNeeded)
 		if err != nil {
-			panic(err)
+			logging.Error.Print(err)
 		}
 
 		logging.Debug.Println("We got this record:")
@@ -124,40 +124,40 @@ func (s *server) rideHandler() http.HandlerFunc {
 func test() {
 	db, err := sql.Open("sqlite3", "./sqlite.db")
 	if err != nil {
-		panic(err)
+		logging.Error.Print(err)
 	}
 
 	// insert
 	stmt, err := db.Prepare("INSERT INTO userinfo(username, departname, created) values(?,?,?)")
 	if err != nil {
-		panic(err)
+		logging.Error.Print(err)
 	}
 
 	res, err := stmt.Exec("astaxie", "mydepartment", "2012-12-09")
 	if err != nil {
-		panic(err)
+		logging.Error.Print(err)
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		panic(err)
+		logging.Error.Print(err)
 	}
 
 	fmt.Println(id)
 	// update
 	stmt, err = db.Prepare("update userinfo set username=? where uid=?")
 	if err != nil {
-		panic(err)
+		logging.Error.Print(err)
 	}
 
 	res, err = stmt.Exec("astaxieupdate", id)
 	if err != nil {
-		panic(err)
+		logging.Error.Print(err)
 	}
 
 	affect, err := res.RowsAffected()
 	if err != nil {
-		panic(err)
+		logging.Error.Print(err)
 	}
 
 	fmt.Println(affect)
@@ -165,7 +165,7 @@ func test() {
 	// query
 	rows, err := db.Query("SELECT * FROM userinfo")
 	if err != nil {
-		panic(err)
+		logging.Error.Print(err)
 	}
 	var uid int
 	var username string
@@ -175,7 +175,7 @@ func test() {
 	for rows.Next() {
 		err = rows.Scan(&uid, &username, &department, &created)
 		if err != nil {
-			panic(err)
+			logging.Error.Print(err)
 		}
 		fmt.Println(uid)
 		fmt.Println(username)

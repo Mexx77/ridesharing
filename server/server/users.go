@@ -3,6 +3,7 @@ package server
 import (
 	"../logging"
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -43,7 +44,20 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 
 		logging.Debug.Print(body)
 
-		w.WriteHeader(http.StatusUnauthorized)
+		stmt, err := s.database.Prepare("SELECT isAdmin FROM users WHERE username = ? AND password = ?")
+		if err != nil {
+			logging.Error.Print(err)
+		}
+		defer stmt.Close()
+		var isAdmin bool
+		err = stmt.QueryRow(payload.Username, payload.Password).Scan(&isAdmin)
+		if err == sql.ErrNoRows {
+			logging.Warning.Printf("Login request with wrong credentials %v", body)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		} else if err != nil {
+			logging.Error.Print(err)
+		}
 
 		userJson, _ := json.Marshal(payload)
 		fmt.Fprint(w, string(userJson))
