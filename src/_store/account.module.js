@@ -14,11 +14,17 @@ const actions = {
                 user => {
                     commit('loginSuccess', user);
                     dispatch('users/setShowLoginForm', false, {root: true})
-                    //router.push('/');
+                    dispatch('alert/success', {
+                        message: `Erfolgreich als ${username} angemeldet`,
+                        visible: true
+                    }, {root: true});
                 },
                 error => {
                     commit('loginFailure', error);
-                    dispatch('alert/error', error, { root: true });
+                    dispatch('alert/error', {
+                        message: error,
+                        visible: true
+                    }, {root: true});
                 }
             );
     },

@@ -54,8 +54,13 @@ export default {
     ...mapState({
       alert: state => state.alert
     }),
-    snackbar() {
-      return this.alert.message !== null
+    snackbar: {
+      get () {
+        return this.$store.state.alert.visible
+      },
+      set (value) {
+        this.$store.dispatch('alert/setVisibility', value)
+      }
     }
   },
   methods: {
