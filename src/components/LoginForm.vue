@@ -55,7 +55,6 @@
                 </v-card>
             </v-form>
         </v-dialog>
-        <v-snackbar v-model="snackbar" :color="snackbarColor">{{ snackbarText }}</v-snackbar>
     </v-row>
 </template>
 
@@ -69,10 +68,7 @@
                 password: '',
                 showPassword: false,
                 submitted: false,
-                formIsValid: false,
-                snackbar: false,
-                snackbarText: '',
-                snackbarColor: 'success'
+                formIsValid: false
             }
         },
         computed: {

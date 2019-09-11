@@ -8,7 +8,13 @@
       <v-spacer></v-spacer>
       <div v-if="$store.state.account.status.loggedIn">
         Hi, {{$store.state.account.user.username}}!
-        <v-icon>mdi-logout-variant</v-icon>
+        <v-btn
+                icon
+                text
+                @click="logout"
+        >
+          <v-icon>mdi-logout-variant</v-icon>
+        </v-btn>
       </div>
       <div v-else>
         <v-btn
@@ -24,6 +30,7 @@
     <v-content>
       <Calendar/>
       <LoginForm/>
+      <v-snackbar v-model="snackbar" :color="alert.type">{{ alert.message }}</v-snackbar>
     </v-content>
     <v-footer>
       <v-spacer></v-spacer>
@@ -35,12 +42,24 @@
 <script>
 import Calendar from "./components/Calendar";
 import LoginForm from "./components/LoginForm";
+import {mapState,mapActions} from 'vuex'
 
 export default {
   name: 'App',
   components: {
     Calendar,
     LoginForm
+  },
+  computed: {
+    ...mapState({
+      alert: state => state.alert
+    }),
+    snackbar() {
+      return this.alert.message !== null
+    }
+  },
+  methods: {
+    ...mapActions('account', ['logout'])
   },
   data: () => ({
     //

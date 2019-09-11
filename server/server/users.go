@@ -12,6 +12,7 @@ import (
 type user struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Token    string `json:"token"`
 }
 
 func (s *server) authenticateHandler() http.HandlerFunc {
@@ -59,6 +60,7 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 			logging.Error.Print(err)
 		}
 
+		payload.Token = "fake-token"
 		userJson, _ := json.Marshal(payload)
 		fmt.Fprint(w, string(userJson))
 	}
