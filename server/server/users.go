@@ -6,13 +6,24 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"net/http"
+	"time"
 )
 
 type user struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Token    string `json:"token"`
+	Expires  time.Time `json:"expires"`
+}
+
+// TODO: load secret from elsewhere
+var jwtKey = []byte("my_secret_key")
+
+type Claims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
 }
 
 func (s *server) authenticateHandler() http.HandlerFunc {
@@ -58,9 +69,26 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 			return
 		} else if err != nil {
 			logging.Error.Print(err)
+			return
 		}
 
-		payload.Token = "fake-token"
+		expirationTime := time.Now().Add(60 * time.Minute)
+		claims := &Claims{
+			Username: payload.Username,
+			StandardClaims: jwt.StandardClaims{
+				ExpiresAt: expirationTime.Unix(),
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		payload.Token, err = token.SignedString(jwtKey)
+		if err != nil {
+			// If there is an error in creating the JWT return an internal server error
+			logging.Error.Printf("unable to create tokenString from token %v", token)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		payload.Expires = expirationTime
+
 		userJson, _ := json.Marshal(payload)
 		fmt.Fprint(w, string(userJson))
 	}
