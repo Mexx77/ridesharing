@@ -1,9 +1,8 @@
 package main
 
 import (
-    "./logging"
-    "./server"
-    _ "github.com/mattn/go-sqlite3"
+	"github.com/Mexx77/ridesharing/logging"
+	"github.com/Mexx77/ridesharing/server"
 )
 
 func main() {

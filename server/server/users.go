@@ -1,11 +1,11 @@
 package server
 
 import (
-	"../logging"
 	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/Mexx77/ridesharing/logging"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"time"

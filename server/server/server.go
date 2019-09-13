@@ -1,8 +1,9 @@
 package server
 
 import (
-	"../logging"
 	"database/sql"
+	"github.com/Mexx77/ridesharing/logging"
+	_ "github.com/mattn/go-sqlite3"
 	"net/http"
 	"os"
 )
