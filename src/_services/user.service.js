@@ -1,5 +1,5 @@
 import {authHeader} from './auth-header';
-import Vue from "vue";
+import * as constants from "./constants"
 
 export const userService = {
     login,
@@ -8,7 +8,8 @@ export const userService = {
     getAll,
     getById,
     update,
-    delete: _delete
+    delete: _delete,
+    tokenIsValid
 };
 
 function login(username, password) {
@@ -18,7 +19,7 @@ function login(username, password) {
         body: JSON.stringify({username, password})
     };
 
-    return fetch(`${Vue.prototype.$hostname}/users/authenticate`, requestOptions)
+    return fetch(`${constants.hostname}/users/authenticate`, requestOptions)
         .then(handleResponse)
         .then(user => {
             // login successful if there's a jwt token in the response
@@ -28,6 +29,17 @@ function login(username, password) {
             }
             return user;
         });
+}
+
+function tokenIsValid(token) {
+    const requestOptions = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: token
+    };
+
+    return fetch(`${constants.hostname}/users/validateToken`, requestOptions)
+        .then(handleResponse)
 }
 
 function logout() {
@@ -42,7 +54,7 @@ function register(user) {
         body: JSON.stringify(user)
     };
 
-    return fetch(`${this.$hostname}/users/register`, requestOptions).then(handleResponse);
+    return fetch(`${constants.hostname}/users/register`, requestOptions).then(handleResponse);
 }
 
 function getAll() {
@@ -51,7 +63,7 @@ function getAll() {
         headers: authHeader()
     };
 
-    return fetch(`${this.$hostname}/users`, requestOptions).then(handleResponse);
+    return fetch(`${constants.hostname}/users`, requestOptions).then(handleResponse);
 }
 
 
@@ -61,7 +73,7 @@ function getById(id) {
         headers: authHeader()
     };
 
-    return fetch(`${this.$hostname}/users/${id}`, requestOptions).then(handleResponse);
+    return fetch(`${constants.hostname}/users/${id}`, requestOptions).then(handleResponse);
 }
 
 function update(user) {
@@ -71,7 +83,7 @@ function update(user) {
         body: JSON.stringify(user)
     };
 
-    return fetch(`${this.$hostname}/users/${user.id}`, requestOptions).then(handleResponse);
+    return fetch(`${constants.hostname}/users/${user.id}`, requestOptions).then(handleResponse);
 }
 
 // prefixed function name with underscore because delete is a reserved word in javascript
@@ -81,7 +93,7 @@ function _delete(id) {
         headers: authHeader()
     };
 
-    return fetch(`${this.$hostname}/users/${id}`, requestOptions).then(handleResponse);
+    return fetch(`${constants.hostname}/users/${id}`, requestOptions).then(handleResponse);
 }
 
 function handleResponse(response) {

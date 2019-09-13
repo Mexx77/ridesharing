@@ -54,8 +54,6 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 			return
 		}
 
-		logging.Debug.Print(body)
-
 		stmt, err := s.database.Prepare("SELECT isAdmin FROM users WHERE username = ? AND password = ?")
 		if err != nil {
 			logging.Error.Print(err)
@@ -69,10 +67,11 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 			return
 		} else if err != nil {
 			logging.Error.Print(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		expirationTime := time.Now().Add(60 * time.Minute)
+		expirationTime := time.Now().Add(1 * time.Minute)
 		claims := &Claims{
 			Username: payload.Username,
 			StandardClaims: jwt.StandardClaims{
@@ -92,4 +91,68 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 		userJson, _ := json.Marshal(payload)
 		fmt.Fprint(w, string(userJson))
 	}
+}
+
+func (s *server) validateTokenHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			errorMsg := fmt.Sprintf("Invalid request method %s. POST is allowed only", r.Method)
+			logging.Error.Print(errorMsg)
+			http.Error(w, errorMsg, http.StatusMethodNotAllowed)
+			return
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(r.Body)
+		tknStr := buf.String()
+
+		if !tokenIsValid(tknStr) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func (s *server) loggedInOnly(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tknStr := r.Header.Get("Authorization")
+		if !tokenIsValid(tknStr) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		h(w, r)
+	}
+}
+
+func (s *server) test() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "visible to logged-on users only")
+	}
+}
+
+func tokenIsValid(tknStr string) bool {
+	if tknStr == "" {
+		logging.Warning.Print("No token provided")
+		return false
+	}
+
+	claims := &Claims{}
+	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			logging.Warning.Print("Token has invalid signature")
+			return false
+		}
+		logging.Warning.Printf("Unable to validate token: %v", err)
+		return false
+	}
+	if !tkn.Valid {
+		logging.Warning.Print("Token is not valid")
+		return false
+	}
+	return true
 }

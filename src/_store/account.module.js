@@ -32,6 +32,13 @@ const actions = {
         userService.logout();
         commit('logout');
     },
+    validateToken({ commit }) {
+        userService.tokenIsValid(state.user.token)
+            .then(
+                () => {},
+                () => commit('logout')
+            )
+    },
     register({ dispatch, commit }, user) {
         commit('registerRequest', user);
 

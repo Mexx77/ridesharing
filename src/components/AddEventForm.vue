@@ -130,6 +130,8 @@
 </template>
 
 <script>
+    import * as constants from '../_services/constants'
+
     export default {
         data() {
             return {
@@ -183,7 +185,7 @@
                 if (this.$refs.form.validate()) {
                     this.showAddEventForm = false;
                     this.$http
-                        .post(this.$hostname + '/ride', {
+                        .post(constants.hostname + '/ride', {
                             driver: this.driver,
                             destination: this.destination,
                             start: `${this.focus}T${this.startTime}:00`,

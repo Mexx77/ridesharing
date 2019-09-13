@@ -42,7 +42,7 @@
 <script>
 import Calendar from "./components/Calendar";
 import LoginForm from "./components/LoginForm";
-import {mapState,mapActions} from 'vuex'
+import {mapState,mapActions} from 'vuex';
 
 export default {
   name: 'App',
@@ -66,8 +66,10 @@ export default {
   methods: {
     ...mapActions('account', ['logout'])
   },
-  data: () => ({
-    //
-  }),
+  mounted: function() {
+    if (this.$store.state.account.status.loggedIn) {
+      this.$store.dispatch('account/validateToken')
+    }
+  }
 };
 </script>

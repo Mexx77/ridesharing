@@ -111,6 +111,7 @@
 
 <script>
     import AddEventForm from "./AddEventForm";
+    import * as constants from "../_services/constants"
 
     export default {
         components: {
@@ -229,7 +230,7 @@
             },
             updateRange({start, end}) {
                 this.$http
-                    .get(this.$hostname + '/rides?start=' + start.date + '&end=' + end.date)
+                    .get(constants.hostname + '/rides?start=' + start.date + '&end=' + end.date)
                     .then((response) => {
                         this.events = response.data
                     });
@@ -252,7 +253,7 @@
         },
         mounted: function () {
             this.$http
-                .get(this.$hostname + '/rides?start=' + this.today  + '&end=' + this.fourDaysFromNow() )
+                .get(constants.hostname + '/rides?start=' + this.today  + '&end=' + this.fourDaysFromNow() )
                 .then((response) => {
                     this.events = response.data
                 });
