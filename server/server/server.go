@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 	"github.com/Mexx77/ridesharing/logging"
+	"github.com/Mexx77/ridesharing/config"
 	_ "github.com/mattn/go-sqlite3"
 	"net/http"
 	"os"
@@ -10,9 +11,11 @@ import (
 
 type server struct {
 	database  *sql.DB
+	config    *config.Config
 }
 
 func NewServer() {
+	conf := config.GetConfig()
 	const databaseFile = "./sqlite.db"
 	if _, err := os.Stat(databaseFile); os.IsNotExist(err) {
 		panic(err)
@@ -25,6 +28,7 @@ func NewServer() {
 
 	server := &server{
 		database: db,
+		config: conf,
 	}
 	server.startHttpServer()
 }
@@ -46,16 +50,15 @@ func (s *server) startHttpServer() {
 
 func (s *server) addCORSHeader(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "application/json")
-		w.Header().Add("Access-Control-Allow-Origin", "*")
-		w.Header().Add("Vary", "Origin")
-		w.Header().Add("Vary", "Access-Control-Request-Method")
-		w.Header().Add("Vary", "Access-Control-Request-Headers")
-		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
-		w.Header().Add("Access-Control-Allow-Methods", "GET, POST,OPTIONS")
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
+		if s.config.Environment == config.DevEnvironment {
+			w.Header().Add("Content-Type", "application/json")
+			w.Header().Add("Access-Control-Allow-Origin", "*")
+			w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
+			w.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
 		}
 		h(w, r)
 	}
