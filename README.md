@@ -1,29 +1,20 @@
-# vuetify
+# Ridesharing
 
-## Project setup
-```
-npm install
-```
+A web app to organize shared rides.
 
-### Compiles and hot-reloads for development
+## Build
 ```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
+git clone git@github.com:Mexx77/ridesharing.git
+cd ridesharing
+docker build -t ridesharing .
 ```
 
-### Run your tests
+## Run locally without Kensis putting
 ```
-npm run test
+docker run \
+ -p 8090:8090 \
+ -e ENVIRONMENT=prod \
+ --name ridesharing \
+ --rm \
+ ridesharing
 ```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
