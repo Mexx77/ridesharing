@@ -1,5 +1,5 @@
 FROM golang:1.13-alpine3.10 as builder
-RUN addgroup --gid 101 -S ridesharing && adduser -S -G ridesharing ridesharing
+RUN addgroup -S ridesharing && adduser -S -G ridesharing ridesharing
 RUN apk add --update build-base npm
 
 # Build frontend
@@ -14,9 +14,9 @@ RUN npm install && npm run build
 ADD server ./server
 WORKDIR server
 ENV GO111MODULE=on
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
  -ldflags "-linkmode external -extldflags -static" \
- -a -installsuffix cgo -o main main.go
+ -a -o main main.go
 
 # ------------------- Cut Here ------------------ #
 
