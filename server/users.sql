@@ -1,1 +1,0 @@
-INSERT INTO users(username,password,isAdmin) values ("frank", "foo", 1);

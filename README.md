@@ -14,7 +14,7 @@ docker build -t ridesharing .
 docker run \
  -p 8090:8090 \
  -e ENVIRONMENT=prod \
- -v `pwd`/server/sqlite.db:/server/sqlite.db \
+ -e MONGO_PW=***** \
  --name ridesharing \
  --rm \
  ridesharing

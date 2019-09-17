@@ -194,11 +194,11 @@
                 this.type = 'day'
             },
             getEventColor(event) {
-                return event.carColor.Valid ? event.carColor.String : 'grey';
+                return event.carColor ? event.carColor : 'grey';
             },
             getEventTextColor(event) {
-                if (event.carColor.Valid) {
-                    return event.carColor.String === 'white' ? 'secondary' : 'white'
+                if (event.carColor) {
+                    return event.carColor === 'white' ? 'secondary' : 'white'
                 } else {
                     return 'white';
                 }

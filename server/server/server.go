@@ -1,35 +1,49 @@
 package server
 
 import (
-	"database/sql"
-	"github.com/Mexx77/ridesharing/logging"
+	"context"
+	"fmt"
 	"github.com/Mexx77/ridesharing/config"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/Mexx77/ridesharing/logging"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
-	"os"
+	"time"
 )
 
 type server struct {
-	database  *sql.DB
-	config    *config.Config
+	users		*mongo.Collection
+	rides		*mongo.Collection
+	mongoClient *mongo.Client
+	config      *config.Config
 }
 
 func NewServer() {
 	conf := config.GetConfig()
-	const databaseFile = "./sqlite.db"
-	if _, err := os.Stat(databaseFile); os.IsNotExist(err) {
-		panic(err)
-	}
-	db, err := sql.Open("sqlite3", databaseFile)
+
+	// MongoDB connection
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(
+		"mongodb+srv://ridesharing:"+ conf.MongoPw +"@ridesharing-tscpu.gcp.mongodb.net/test?retryWrites=true&w=majority",
+	))
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		panic(err)
+	}
+	logging.Info.Println("Connected to MongoDB!")
 
 	server := &server{
-		database: db,
+		rides: client.Database("ridesharing").Collection("rides"),
+		users: client.Database("ridesharing").Collection("users"),
+		mongoClient: client,
 		config: conf,
 	}
+
+	defer server.closeMongoConnection()
 	server.startHttpServer()
 }
 
@@ -62,4 +76,12 @@ func (s *server) addCORSHeader(h http.HandlerFunc) http.HandlerFunc {
 		}
 		h(w, r)
 	}
+}
+
+func (s *server) closeMongoConnection() {
+	err := s.mongoClient.Disconnect(context.TODO())
+	if err != nil {
+		logging.Error.Println(err)
+	}
+	fmt.Println("Connection to MongoDB closed.")
 }

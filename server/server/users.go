@@ -2,11 +2,14 @@ package server
 
 import (
 	"bytes"
-	"database/sql"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/Mexx77/ridesharing/logging"
 	"github.com/dgrijalva/jwt-go"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
 	"time"
 )
@@ -54,19 +57,18 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 			return
 		}
 
-		stmt, err := s.database.Prepare("SELECT isAdmin FROM users WHERE username = ? AND password = ?")
-		if err != nil {
-			logging.Error.Print(err)
+		filter := bson.D{
+			{"username",  payload.Username},
+			{"password",  payload.Password},
 		}
-		defer stmt.Close()
-		var isAdmin bool
-		err = stmt.QueryRow(payload.Username, payload.Password).Scan(&isAdmin)
-		if err == sql.ErrNoRows {
-			logging.Warning.Printf("Login request with wrong credentials %v", body)
+		res := s.users.FindOne(context.TODO(), filter, options.FindOne())
+		var user user
+		err = res.Decode(&user)
+		if err == mongo.ErrNoDocuments {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		} else if err != nil {
-			logging.Error.Print(err)
+			logging.Error.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
