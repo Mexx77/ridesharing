@@ -9,7 +9,7 @@ export const userService = {
     getById,
     update,
     delete: _delete,
-    tokenIsValid
+    refreshToken
 };
 
 function login(username, password) {
@@ -31,15 +31,25 @@ function login(username, password) {
         });
 }
 
-function tokenIsValid(token) {
+function refreshToken(token) {
     const requestOptions = {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: token
     };
 
-    return fetch(`${constants.hostname}/users/validateToken`, requestOptions)
+    return fetch(`${constants.hostname}/users/refreshToken`, requestOptions)
         .then(handleResponse)
+        .then(data => {
+            if (!data.token) {
+                return Promise.reject('no token in response');
+            }
+            const userString = localStorage.getItem('user');
+            let user = JSON.parse(userString)
+            user.token = data.token
+            user.expires = data.expires
+            localStorage.setItem('user', JSON.stringify(user));
+        })
 }
 
 function logout() {

@@ -68,7 +68,7 @@ export default {
   },
   mounted: function() {
     if (this.$store.state.account.status.loggedIn) {
-      this.$store.dispatch('account/validateToken')
+      this.$store.dispatch('account/refreshToken')
     }
   }
 };

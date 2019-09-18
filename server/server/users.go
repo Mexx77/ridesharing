@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Mexx77/ridesharing/logging"
 	"github.com/dgrijalva/jwt-go"
@@ -14,15 +15,14 @@ import (
 	"time"
 )
 
+const tokenExpiryTimeMinutes = 60
+
 type user struct {
 	Username string `json:"username"`
-	Password string `json:"password"`
+	Password string `json:"password,omitempty"`
 	Token    string `json:"token"`
 	Expires  time.Time `json:"expires"`
 }
-
-// TODO: load secret from elsewhere
-var jwtKey = []byte("my_secret_key")
 
 type Claims struct {
 	Username string `json:"username"`
@@ -65,6 +65,7 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 		var user user
 		err = res.Decode(&user)
 		if err == mongo.ErrNoDocuments {
+			logging.Warning.Printf("Authentication failed for %s\n", body)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		} else if err != nil {
@@ -73,7 +74,7 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 			return
 		}
 
-		expirationTime := time.Now().Add(1 * time.Minute)
+		expirationTime := time.Now().Add(tokenExpiryTimeMinutes * time.Minute)
 		claims := &Claims{
 			Username: payload.Username,
 			StandardClaims: jwt.StandardClaims{
@@ -81,16 +82,56 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 			},
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		payload.Token, err = token.SignedString(jwtKey)
+		payload.Token, err = token.SignedString(s.config.JwtSecret)
 		if err != nil {
-			// If there is an error in creating the JWT return an internal server error
 			logging.Error.Printf("unable to create tokenString from token %v", token)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		payload.Expires = expirationTime
+		payload.Password = "" // Don't need to send it back
 
 		userJson, _ := json.Marshal(payload)
+		fmt.Fprint(w, string(userJson))
+	}
+}
+
+func (s *server) refreshTokenHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			errorMsg := fmt.Sprintf("Invalid request method %s. POST is allowed only", r.Method)
+			logging.Error.Println(errorMsg)
+			http.Error(w, errorMsg, http.StatusMethodNotAllowed)
+			return
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(r.Body)
+		oldTokenString := buf.String()
+
+		claims, err := s.tokenIsValid(oldTokenString)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		expirationTime := time.Now().Add(tokenExpiryTimeMinutes * time.Minute)
+		claims.ExpiresAt = expirationTime.Unix()
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		newTokenString, err := token.SignedString(s.config.JwtSecret)
+		if err != nil {
+			logging.Error.Printf("unable to create newTokenString from token %v", token)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		user := user{
+			Username: claims.Username,
+			Token:    newTokenString,
+			Expires:  expirationTime,
+		}
+
+		userJson, _ := json.Marshal(user)
 		fmt.Fprint(w, string(userJson))
 	}
 }
@@ -108,7 +149,7 @@ func (s *server) validateTokenHandler() http.HandlerFunc {
 		buf.ReadFrom(r.Body)
 		tknStr := buf.String()
 
-		if !tokenIsValid(tknStr) {
+		if _, err := s.tokenIsValid(tknStr); err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -120,7 +161,7 @@ func (s *server) validateTokenHandler() http.HandlerFunc {
 func (s *server) loggedInOnly(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tknStr := r.Header.Get("Authorization")
-		if !tokenIsValid(tknStr) {
+		if _, err := s.tokenIsValid(tknStr); err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -134,27 +175,23 @@ func (s *server) test() http.HandlerFunc {
 	}
 }
 
-func tokenIsValid(tknStr string) bool {
+func (s *server) tokenIsValid(tknStr string) (claims *Claims, err error) {
 	if tknStr == "" {
-		logging.Warning.Print("No token provided")
-		return false
+		return nil, errors.New("no token provided")
 	}
 
-	claims := &Claims{}
-	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
+	cla := &Claims{}
+	tkn, err := jwt.ParseWithClaims(tknStr, cla, func(token *jwt.Token) (interface{}, error) {
+		return s.config.JwtSecret, nil
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			logging.Warning.Print("Token has invalid signature")
-			return false
+			return nil, errors.New("token has invalid signature")
 		}
-		logging.Warning.Printf("Unable to validate token: %v", err)
-		return false
+		return nil, errors.New("token is invalid " + err.Error())
 	}
 	if !tkn.Valid {
-		logging.Warning.Print("Token is not valid")
-		return false
+		return nil, errors.New("token is invalid")
 	}
-	return true
+	return cla, nil
 }

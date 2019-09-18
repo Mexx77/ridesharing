@@ -9,17 +9,21 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
+	"strings"
 )
 
 type ride struct {
-	Driver       string  `json:"driver"`
-	CarName      string	 `json:"carName" bson:"carName"`
-	Destination  string  `json:"destination"`
-	Start        string  `json:"start"`
-	End          string  `json:"end"`
-	Confirmed    bool    `json:"confirmed"`
-	BigCarNeeded bool    `json:"bigCarNeeded" bson:"bigCarNeeded"`
-	Name         string  `json:"name"`
+	Driver       string `json:"driver"`
+	CarName      string `json:"carName" bson:"carName"`
+	CarColor     string `json:"carColor" bson:"carColor"`
+	Destination  string `json:"destination"`
+	Start        string `json:"start"`
+	End          string `json:"end"`
+	Confirmed    bool   `json:"confirmed"`
+	BigCarNeeded bool   `json:"bigCarNeeded" bson:"bigCarNeeded"`
+	IsBig        bool   `json:"isBig" bson:"isBig"`
+	Name         string `json:"name"`
+	Details      string `json:"details"`
 }
 
 func (s *server) ridesHandler() http.HandlerFunc {
@@ -34,18 +38,43 @@ func (s *server) ridesHandler() http.HandlerFunc {
 		end := r.URL.Query().Get("end")
 		if len(end) == 0 {
 			end = "9999-12-31"
-		}else {
+		} else {
 			end = end + "T23:59:59"
+		}
+
+		ridesCarsPipeline := bson.A{
+			bson.D{
+				{"$match", bson.D{
+					{"start", bson.D{{"$gt", start}}},
+					{"end", bson.D{{"$lt", end}}},
+				}},
+			},
+			bson.D{
+				{"$lookup", bson.D{
+					{"from", "cars"},
+					{"localField", "carName"},
+					{"foreignField", "carName"},
+					{"as", "fromCars"},
+				}},
+			},
+			bson.D{
+				{"$replaceRoot", bson.D{{
+					"newRoot", bson.D{
+						{"$mergeObjects", bson.A{
+							bson.D{{
+								"$arrayElemAt", bson.A{"$fromCars", 0},
+							}},
+							"$$ROOT",
+						}},
+					},
+				}}},
+			},
+			bson.D{{"$project", bson.D{{"fromCars", 0}}}},
 		}
 
 		rides := make([]ride, 0)
 
-		filter := bson.D{
-			{"start",  bson.D{{"$gt", start}}},
-			{"end",    bson.D{{"$lt", end}}},
-		}
-
-		cur, err := s.rides.Find(context.TODO(), filter, options.Find())
+		cur, err := s.rides.Aggregate(context.TODO(), ridesCarsPipeline, options.Aggregate())
 		if err != nil {
 			logging.Error.Print(err)
 		}
@@ -53,13 +82,39 @@ func (s *server) ridesHandler() http.HandlerFunc {
 			var ride ride
 			err := cur.Decode(&ride)
 			if err != nil {
-				logging.Error.Print(err)
+				logging.Error.Println(err)
 			}
 			ride.Name = ride.Driver + " ↦ " + ride.Destination
+
+			startSlice := strings.Split(strings.Split(ride.Start,"T")[1],":")
+			timeStartStr := startSlice[0] + ":" + startSlice[1]
+
+			if ride.Confirmed {
+				ride.Details = fmt.Sprintf(
+					"%s fährt mit dem %s um %s nach %s",
+					ride.Driver,
+					ride.CarName,
+					timeStartStr,
+					ride.Destination,
+				)
+			} else {
+				bigCarTxt := ""
+				if ride.BigCarNeeded {
+					bigCarTxt = "mit einem großen Auto"
+				}
+				ride.Details = fmt.Sprintf(
+					"%s möchte %s um %s nach %s fahren",
+					ride.Driver,
+					bigCarTxt,
+					timeStartStr,
+					ride.Destination,
+				)
+			}
+
 			rides = append(rides, ride)
 		}
 		if err := cur.Err(); err != nil {
-			logging.Error.Print(err)
+			logging.Error.Println(err)
 		}
 		cur.Close(context.TODO())
 

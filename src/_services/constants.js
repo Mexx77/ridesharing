@@ -1,1 +1,1 @@
-export const hostname = 'http://localhost:8090';
+export const hostname = process.env.NODE_ENV === 'development' ? 'http://localhost:8090': '';

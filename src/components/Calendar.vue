@@ -65,12 +65,11 @@
                         v-model="selectedOpen"
                         :close-on-content-click="false"
                         :activator="selectedElement"
-                        full-width
                         offset-x
                 >
                     <v-card
                             color="grey lighten-4"
-                            min-width="350px"
+                            min-width="300px"
                             flat
                     >
                         <v-toolbar
@@ -98,7 +97,7 @@
                                     color="secondary"
                                     @click="selectedOpen = false"
                             >
-                                Cancel
+                                Abbrechen
                             </v-btn>
                         </v-card-actions>
                     </v-card>
@@ -194,7 +193,7 @@
                 this.type = 'day'
             },
             getEventColor(event) {
-                return event.carColor ? event.carColor : 'grey';
+                return event.confirmed && event.carColor ? event.carColor : 'grey';
             },
             getEventTextColor(event) {
                 if (event.carColor) {

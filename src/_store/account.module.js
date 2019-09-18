@@ -32,8 +32,8 @@ const actions = {
         userService.logout();
         commit('logout');
     },
-    validateToken({ commit }) {
-        userService.tokenIsValid(state.user.token)
+    refreshToken({ commit }) {
+        userService.refreshToken(state.user.token)
             .catch(() => commit('logout'))
     },
     register({ dispatch, commit }, user) {

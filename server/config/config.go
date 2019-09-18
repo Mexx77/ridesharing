@@ -7,14 +7,18 @@ import (
 
 var config *Config
 
-// env var constants
+// env vars
 const environment 		= "ENVIRONMENT"
 const mongoPw 			= "MONGO_PW"
-const DevEnvironment 	= "dev"
+const jwtSecret			= "JWT_SECRET"
+
+// build constants
+const DevEnvironment 	     = "dev"
 
 type Config struct {
 	Environment string
-	MongoPw string
+	MongoPw 	string
+	JwtSecret 	[]byte
 }
 
 func GetConfig() *Config {
@@ -22,6 +26,7 @@ func GetConfig() *Config {
 		return &Config{
 			Environment: getConfigString(environment, true),
 			MongoPw: getConfigString(mongoPw, false),
+			JwtSecret: []byte(getConfigString(jwtSecret, false)),
 		}
 	} else {
 		return config

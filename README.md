@@ -9,12 +9,15 @@ cd ridesharing
 docker build -t ridesharing .
 ```
 
-## Run locally without Kensis putting
+## Run
 ```
+MONGO_PW=
+JWT_SECRET=
 docker run \
  -p 8090:8090 \
  -e ENVIRONMENT=prod \
- -e MONGO_PW=***** \
+ -e MONGO_PW=$MONGO_PW \
+ -e JWT_SECRET=$JWT_SECRET \
  --name ridesharing \
  --rm \
  ridesharing
