@@ -1,0 +1,18 @@
+{
+  "name": "ridesharing",
+  "env": {
+    "ENVIRONMENT": {
+      "description": "specify dev or prod",
+      "value": "prod",
+      "required": true
+    },
+    "MONGO_PW": {
+      "description": "the mongo atlas password",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "the secret to sign/verify jwt token",
+      "required": true
+    }
+  }
+}
