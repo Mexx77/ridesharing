@@ -111,6 +111,7 @@ func (s *server) refreshTokenHandler() http.HandlerFunc {
 
 		claims, err := s.tokenIsValid(oldTokenString)
 		if err != nil {
+			logging.Warning.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -150,6 +151,7 @@ func (s *server) validateTokenHandler() http.HandlerFunc {
 		tknStr := buf.String()
 
 		if _, err := s.tokenIsValid(tknStr); err != nil {
+			logging.Warning.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -162,6 +164,7 @@ func (s *server) loggedInOnly(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tknStr := r.Header.Get("Authorization")
 		if _, err := s.tokenIsValid(tknStr); err != nil {
+			logging.Warning.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
