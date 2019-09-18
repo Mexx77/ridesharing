@@ -48,13 +48,12 @@ func NewServer() {
 }
 
 func (s *server) startHttpServer() {
-	const port = ":8090"
 	httpServer := &http.Server{
-		Addr:     port,
+		Addr:     fmt.Sprintf(":%s", s.config.Port),
 		ErrorLog: logging.Error,
 	}
 
-	logging.Info.Print("Starting insecure http server on port ", port)
+	logging.Info.Print("Starting http server on port ", s.config.Port)
 	s.routes()
 	if err := httpServer.ListenAndServe(); err != nil {
 		panic(err)

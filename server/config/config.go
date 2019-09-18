@@ -8,25 +8,28 @@ import (
 var config *Config
 
 // env vars
-const environment 		= "ENVIRONMENT"
-const mongoPw 			= "MONGO_PW"
-const jwtSecret			= "JWT_SECRET"
+const environment = "ENVIRONMENT"
+const port 		  = "PORT"
+const mongoPw 	  = "MONGO_PW"
+const jwtSecret   = "JWT_SECRET"
 
 // build constants
-const DevEnvironment 	     = "dev"
+const DevEnvironment = "dev"
 
 type Config struct {
 	Environment string
-	MongoPw 	string
-	JwtSecret 	[]byte
+	Port        string
+	MongoPw     string
+	JwtSecret   []byte
 }
 
 func GetConfig() *Config {
-	if config == nil{
+	if config == nil {
 		return &Config{
 			Environment: getConfigString(environment, true),
-			MongoPw: getConfigString(mongoPw, false),
-			JwtSecret: []byte(getConfigString(jwtSecret, false)),
+			Port:        getConfigString(port, true),
+			MongoPw:     getConfigString(mongoPw, false),
+			JwtSecret:   []byte(getConfigString(jwtSecret, false)),
 		}
 	} else {
 		return config
@@ -42,7 +45,7 @@ func getConfigString(envVar string, print bool) string {
 	if print {
 		logging.Info.Print(envVar+": ", entry)
 	} else {
-		logging.Info.Print(envVar+": ******")
+		logging.Info.Print(envVar + ": ******")
 	}
 	return entry
 }

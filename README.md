@@ -14,11 +14,13 @@ docker build -t ridesharing .
 
 ## Run
 ```
+PORT=8080
 MONGO_PW=
 JWT_SECRET=
 docker run \
- -p 8090:8090 \
+ -p $PORT:$PORT \
  -e ENVIRONMENT=prod \
+ -e PORT=$PORT \
  -e MONGO_PW=$MONGO_PW \
  -e JWT_SECRET=$JWT_SECRET \
  --name ridesharing \
