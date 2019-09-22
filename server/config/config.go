@@ -25,12 +25,13 @@ type Config struct {
 
 func GetConfig() *Config {
 	if config == nil {
-		return &Config{
+		config = &Config{
 			Environment: getConfigString(environment, true),
 			Port:        getConfigString(port, true),
 			MongoPw:     getConfigString(mongoPw, false),
 			JwtSecret:   []byte(getConfigString(jwtSecret, false)),
 		}
+		return config
 	} else {
 		return config
 	}
