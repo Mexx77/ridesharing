@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"github.com/Mexx77/ridesharing/logging"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
 	"strings"
 )
 
 type ride struct {
+	Id 			 primitive.ObjectID `json:"_id, omitempty" bson:"_id, omitempty"`
 	Driver       string `json:"driver"`
 	CarName      string `json:"carName" bson:"carName"`
 	CarColor     string `json:"carColor" bson:"carColor"`
