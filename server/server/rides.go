@@ -102,10 +102,10 @@ func (s *server) ridesHandler() http.HandlerFunc {
 			} else {
 				bigCarTxt := ""
 				if ride.BigCarNeeded {
-					bigCarTxt = "mit einem großen Auto"
+					bigCarTxt = "mit einem großen Auto "
 				}
 				ride.Details = fmt.Sprintf(
-					"%s möchte %s um %s nach %s fahren",
+					"%s möchte %sum %s nach %s fahren",
 					ride.Driver,
 					bigCarTxt,
 					timeStartStr,
