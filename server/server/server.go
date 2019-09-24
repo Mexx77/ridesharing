@@ -66,8 +66,8 @@ func (s *server) addCORSHeader(h http.HandlerFunc) http.HandlerFunc {
 		if s.config.Environment == config.DevEnvironment {
 			w.Header().Add("Content-Type", "application/json")
 			w.Header().Add("Access-Control-Allow-Origin", "*")
-			w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
-			w.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, Authorization")
+			w.Header().Add("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
 			if r.Method == http.MethodOptions {
 				w.WriteHeader(http.StatusNoContent)
 				return

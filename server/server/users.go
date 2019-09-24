@@ -27,6 +27,7 @@ type user struct {
 
 type Claims struct {
 	Username string `json:"username"`
+	IsAdmin  bool   `json:"isAdmin"`
 	jwt.StandardClaims
 }
 
@@ -78,6 +79,7 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 		expirationTime := time.Now().Add(tokenExpiryTimeMinutes * time.Minute)
 		claims := &Claims{
 			Username: payload.Username,
+			IsAdmin: user.IsAdmin,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: expirationTime.Unix(),
 			},
@@ -167,6 +169,23 @@ func (s *server) loggedInOnly(h http.HandlerFunc) http.HandlerFunc {
 		tknStr := r.Header.Get("Authorization")
 		if _, err := s.tokenIsValid(tknStr); err != nil {
 			logging.Warning.Println(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		h(w, r)
+	}
+}
+
+func (s *server) adminOnly(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tknStr := r.Header.Get("Authorization")
+		claims, err := s.tokenIsValid(tknStr)
+		if err != nil {
+			logging.Warning.Println(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		} else if !claims.IsAdmin {
+			logging.Warning.Println("Token is valid but this route is for admins only")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

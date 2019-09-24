@@ -64,7 +64,9 @@
         },
         methods: {
             deleteRide() {
-              rideService.rideService.delete(12)
+                rideService.rideService.delete(this.selectedEvent.id, this.selectedEvent.name)
+                this.selectedOpen = false
+                // TODO: delete event from events in store (needs refactoring)
             },
             getEventColor(event) {
                 return event.confirmed && event.carColor ? event.carColor : 'grey';

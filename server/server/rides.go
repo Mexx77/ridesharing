@@ -14,7 +14,7 @@ import (
 )
 
 type ride struct {
-	Id 			 primitive.ObjectID `json:"_id, omitempty" bson:"_id, omitempty"`
+	Id 			 primitive.ObjectID `json:"id, omitempty" bson:"_id, omitempty"`
 	Driver       string `json:"driver"`
 	CarName      string `json:"carName" bson:"carName"`
 	CarColor     string `json:"carColor" bson:"carColor"`
@@ -161,6 +161,36 @@ func (s *server) rideHandler() http.HandlerFunc {
 		}
 
 		logging.Debug.Println("We got this record: ", body)
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func (s *server) rideDeleteHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		id := r.URL.Query().Get("id")
+		if len(id) == 0 {
+			errorMsg := "No id provided for ride deletion"
+			logging.Error.Println(errorMsg)
+			http.Error(w, errorMsg, http.StatusBadRequest)
+			return
+		}
+
+		objId, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			logging.Error.Println("unable to read ObjectID from string: ", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		deletePipeline := bson.D{
+			{"_id", objId},
+		}
+		_, err = s.rides.DeleteOne(context.TODO(),deletePipeline)
+		if err != nil {
+			logging.Error.Println("unable to delete ride: ", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

@@ -43,24 +43,24 @@
             </v-sheet>
             <v-sheet>
                 <v-calendar
-                        ref="calendar"
-                        v-model="focus"
-                        color="primary"
-                        :events="events"
-                        :event-color="getEventColor"
-                        :event-text-color="getEventTextColor"
-                        :event-margin-bottom="3"
-                        :event-overlap-threshold=60
-                        :now="today"
-                        :type="type"
-                        :first-interval="7"
-                        :interval-count="15"
-                        @click:event="showEvent"
-                        @click:more="viewDay"
-                        @click:date="viewDay"
-                        @click:time="addEvent"
-                        @change="updateRange"
-                ></v-calendar>
+                    ref="calendar"
+                    v-model="focus"
+                    color="primary"
+                    :events="events"
+                    :event-color="getEventColor"
+                    :event-text-color="getEventTextColor"
+                    :event-margin-bottom="3"
+                    :event-overlap-threshold=60
+                    :now="today"
+                    :type="type"
+                    :first-interval="7"
+                    :interval-count="15"
+                    @click:event="showEvent"
+                    @click:more="viewDay"
+                    @click:date="viewDay"
+                    @click:time="addEvent"
+                    @change="updateRange"
+            ></v-calendar>
                 <RideCard/>
                 <AddEventForm/>
             </v-sheet>

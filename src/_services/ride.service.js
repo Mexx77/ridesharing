@@ -7,13 +7,17 @@ export const rideService = {
 };
 
 // prefixed function name with underscore because delete is a reserved word in javascript
-function _delete(id) {
+function _delete(id, name) {
+    const confirmed = confirm(`Die Fahrt '${name}' wirklich löschen?`)
+    if (!confirmed) {
+        return
+    }
     const requestOptions = {
         method: 'DELETE',
         headers: authHeader()
     };
 
-    return fetch(`${constants.hostname}/rides/${id}`, requestOptions).then(handleResponse);
+    return fetch(`${constants.hostname}/ride/delete?id=${id}`, requestOptions).then(handleResponse);
 }
 
 function handleResponse(response) {
