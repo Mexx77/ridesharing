@@ -22,6 +22,7 @@ type user struct {
 	Password string `json:"password,omitempty"`
 	Token    string `json:"token"`
 	Expires  time.Time `json:"expires"`
+	IsAdmin  bool   `json:"isAdmin" bson:"isAdmin"`
 }
 
 type Claims struct {
@@ -90,6 +91,7 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 		}
 		payload.Expires = expirationTime
 		payload.Password = "" // Don't need to send it back
+		payload.IsAdmin = user.IsAdmin
 
 		userJson, _ := json.Marshal(payload)
 		fmt.Fprint(w, string(userJson))

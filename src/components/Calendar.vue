@@ -61,47 +61,7 @@
                         @click:time="addEvent"
                         @change="updateRange"
                 ></v-calendar>
-                <v-menu
-                        v-model="selectedOpen"
-                        :close-on-content-click="false"
-                        :activator="selectedElement"
-                        offset-x
-                >
-                    <v-card
-                            color="grey lighten-4"
-                            min-width="300px"
-                            flat
-                    >
-                        <v-toolbar
-                                :color="selectedEvent.getEventColor"
-                                :style="{color: selectedEvent.getEventTextColor}"
-                        >
-                            <v-btn icon small>
-                                <v-icon>mdi-pencil</v-icon>
-                            </v-btn>
-                            <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
-                            <v-spacer></v-spacer>
-                            <v-btn icon small>
-                                <v-icon>mdi-heart-outline</v-icon>
-                            </v-btn>
-                            <v-btn icon small>
-                                <v-icon>mdi-dots-vertical</v-icon>
-                            </v-btn>
-                        </v-toolbar>
-                        <v-card-text>
-                            <span v-html="selectedEvent.details"></span>
-                        </v-card-text>
-                        <v-card-actions>
-                            <v-btn
-                                    text
-                                    color="secondary"
-                                    @click="selectedOpen = false"
-                            >
-                                Abbrechen
-                            </v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-menu>
+                <RideCard/>
                 <AddEventForm/>
             </v-sheet>
         </v-col>
@@ -110,11 +70,13 @@
 
 <script>
     import AddEventForm from "./AddEventForm";
+    import RideCard from "./RideCard";
     import * as constants from "../_services/constants"
 
     export default {
         components: {
-            AddEventForm
+            AddEventForm,
+            RideCard
         },
         computed: {
             title() {
@@ -157,7 +119,7 @@
                 set (value) {
                     this.$store.commit('rides/setFocus', value)
                 }
-            }
+            },
         },
         methods: {
             fourDaysFromNow() {
@@ -213,13 +175,13 @@
             },
             showEvent({nativeEvent, event}) {
                 const open = () => {
-                    this.selectedEvent = event
-                    this.selectedElement = nativeEvent.target
-                    setTimeout(() => this.selectedOpen = true, 10)
+                    this.$store.commit('rides/setSelectedEvent', event)
+                    this.$store.commit('rides/setSelectedElement', nativeEvent.target)
+                    setTimeout(() => this.$store.commit('rides/setSelectedOpen', true), 10)
                 }
 
-                if (this.selectedOpen) {
-                    this.selectedOpen = false
+                if (this.$store.state.rides.selectedOpen) {
+                    this.$store.commit('rides/setSelectedOpen', false)
                     setTimeout(open, 10)
                 } else {
                     open()
@@ -268,17 +230,8 @@
                     day: 'Tag',
                     '4day': '4 Tage',
                 },
-                selectedEvent: {},
-                selectedElement: null,
-                selectedOpen: false,
                 events: [],
             }
         }
     }
 </script>
-
-<style>
-    .v-event-timed {
-        font-size: 16px !important;
-    }
-</style>
