@@ -42,6 +42,7 @@
 </template>
 
 <script>
+    import * as helper from '../_services/helper'
     import {mapActions} from 'vuex'
 
     export default {
@@ -75,16 +76,8 @@
             editRide() {
                 this.$store.commit('ride/setShowAddEventForm', true)
             },
-            getEventColor(event) {
-                return event.confirmed && event.carColor ? event.carColor : 'grey';
-            },
-            getEventTextColor(event) {
-                if (event.carColor) {
-                    return event.carColor === 'white' ? 'secondary' : 'white'
-                } else {
-                    return 'white';
-                }
-            }
+            getEventColor: helper.getEventColor,
+            getEventTextColor: helper.getEventTextColor
         },
         data() {
             return {

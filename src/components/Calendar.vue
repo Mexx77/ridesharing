@@ -72,6 +72,7 @@
     import AddUpdateRideForm from "./AddUpdateRideForm";
     import RideCard from "./RideCard";
     import * as constants from "../_services/constants"
+    import * as helper from '../_services/helper'
 
     export default {
         components: {
@@ -154,16 +155,8 @@
                 this.focus = date
                 this.type = 'day'
             },
-            getEventColor(event) {
-                return event.confirmed && event.carColor ? event.carColor : 'grey';
-            },
-            getEventTextColor(event) {
-                if (event.carColor) {
-                    return event.carColor === 'white' ? 'secondary' : 'white'
-                } else {
-                    return 'white';
-                }
-            },
+            getEventColor: helper.getEventColor,
+            getEventTextColor: helper.getEventTextColor,
             setToday() {
                 this.focus = this.today
             },
