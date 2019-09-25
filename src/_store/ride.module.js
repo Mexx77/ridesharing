@@ -56,7 +56,13 @@ const mutations = {
     setBigCarNeeded: (state, v) => state.bigCarNeeded = v,
     setStartTime: (state, v) => state.startTime = v,
     setEndTime: (state, v) => state.endTime = v,
-    setShowAddEventForm: (state, v) => state.showAddEventForm = v,
+    setShowAddEventForm: (state, v) => {
+        if(v) {
+            state.driver = state.selectedEvent.driver ? state.selectedEvent.driver : state.driver
+            state.destination = state.selectedEvent.destination ? state.selectedEvent.destination : state.destination
+        }
+        state.showAddEventForm = v
+    },
     setFocus: (state, v) => state.focus = v,
     setSelectedOpen: (state, v) => {
         if(!v) {
