@@ -1,24 +1,23 @@
 <template>
     <v-menu
-            v-model="selectedOpen"
-            :close-on-content-click="false"
-            :activator="this.$store.state.rides.selectedElement"
-            offset-x
+        v-model="selectedOpen"
+        :close-on-content-click="false"
+        :activator="this.$store.state.ride.selectedElement"
+        offset-x
     >
         <v-card
-                color="grey lighten-4"
-                min-width="300px"
-                flat
+            color="grey lighten-4"
+            min-width="300px"
+            flat
         >
             <v-toolbar
-                    :color="selectedEvent.getEventColor"
-                    :style="{color: selectedEvent.getEventTextColor}"
+                :color="selectedEvent.getEventColor"
+                :style="{color: selectedEvent.getEventTextColor}"
             >
-
                 <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
                 <v-spacer></v-spacer>
-                <template v-if="$store.state.account.status.loggedIn && $store.state.account.user.isAdmin">
-                    <v-btn icon small>
+                <template v-if="isAdmin">
+                    <v-btn icon small @click="editRide">
                         <v-icon>mdi-pencil</v-icon>
                     </v-btn>
                     <v-btn icon small @click="deleteRide">
@@ -31,9 +30,9 @@
             </v-card-text>
             <v-card-actions>
                 <v-btn
-                        text
-                        color="secondary"
-                        @click="selectedOpen = false"
+                    text
+                    color="secondary"
+                    @click="selectedOpen = false"
                 >
                     Abbrechen
                 </v-btn>
@@ -43,30 +42,38 @@
 </template>
 
 <script>
-    let rideService = require("../_services/ride.service");
+    import {mapActions} from 'vuex'
 
     export default {
         computed: {
             selectedOpen: {
                 get () {
-                  return this.$store.state.rides.selectedOpen
+                  return this.$store.state.ride.selectedOpen
                 },
                 set (value) {
-                  this.$store.commit('rides/setSelectedOpen', value)
+                  this.$store.commit('ride/setSelectedOpen', value)
                 }
             },
             selectedEvent: {
                 get () {
-                  return this.$store.state.rides.selectedEvent
+                  return this.$store.state.ride.selectedEvent
                 }
             },
-
+            isAdmin: function () {
+                return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
+            }
         },
         methods: {
+            ...mapActions('ride', ['delete']),
             deleteRide() {
-                rideService.rideService.delete(this.selectedEvent.id, this.selectedEvent.name)
-                this.selectedOpen = false
-                // TODO: delete event from events in store (needs refactoring)
+                const confirmed = confirm(`Die Fahrt ${this.selectedEvent.name} wirklich löschen?`)
+                if (!confirmed) {
+                    return
+                }
+                this.delete(this.selectedEvent.id)
+            },
+            editRide() {
+                this.$store.commit('ride/setShowAddEventForm', true)
             },
             getEventColor(event) {
                 return event.confirmed && event.carColor ? event.carColor : 'grey';

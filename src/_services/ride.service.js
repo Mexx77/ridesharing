@@ -4,20 +4,27 @@ import {userService} from "./user.service";
 
 export const rideService = {
     delete: _delete,
+    add
 };
 
 // prefixed function name with underscore because delete is a reserved word in javascript
-function _delete(id, name) {
-    const confirmed = confirm(`Die Fahrt '${name}' wirklich löschen?`)
-    if (!confirmed) {
-        return
-    }
+function _delete(id) {
     const requestOptions = {
         method: 'DELETE',
         headers: authHeader()
     };
 
     return fetch(`${constants.hostname}/ride/delete?id=${id}`, requestOptions).then(handleResponse);
+}
+
+function add(ride) {
+    const requestOptions = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(ride),
+    };
+
+    return fetch(`${constants.hostname}/ride/add`, requestOptions).then(handleResponse)
 }
 
 function handleResponse(response) {

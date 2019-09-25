@@ -68,7 +68,7 @@ const mutations = {
     setShowLoginForm: (state, v) => state.showLoginForm = v,
 };
 
-export const users = {
+export const user = {
     namespaced: true,
     state,
     actions,

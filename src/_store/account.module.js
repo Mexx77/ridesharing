@@ -13,7 +13,7 @@ const actions = {
             .then(
                 user => {
                     commit('loginSuccess', user);
-                    dispatch('users/setShowLoginForm', false, {root: true})
+                    dispatch('user/setShowLoginForm', false, {root: true})
                     dispatch('alert/success', {
                         message: `Erfolgreich als ${username} angemeldet`,
                         visible: true

@@ -3,8 +3,8 @@ import Vuex from 'vuex';
 
 import { alert } from './alert.module';
 import { account } from './account.module';
-import { users } from './users.module';
-import { rides } from './rides.module';
+import { user } from './user.module';
+import { ride } from './ride.module';
 
 Vue.use(Vuex);
 
@@ -12,7 +12,7 @@ export const store = new Vuex.Store({
     modules: {
         alert,
         account,
-        users,
-        rides
+        user: user,
+        ride: ride
     }
 });

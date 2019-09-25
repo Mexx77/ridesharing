@@ -8,22 +8,23 @@ import (
 	"github.com/Mexx77/ridesharing/logging"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
 	"strings"
 )
 
 type ride struct {
-	Id 			 primitive.ObjectID `json:"id, omitempty" bson:"_id, omitempty"`
+	Id 			 primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Driver       string `json:"driver"`
 	CarName      string `json:"carName" bson:"carName"`
-	CarColor     string `json:"carColor" bson:"carColor"`
+	CarColor     string `json:"carColor" bson:"carColor,omitempty"`
 	Destination  string `json:"destination"`
 	Start        string `json:"start"`
 	End          string `json:"end"`
 	Confirmed    bool   `json:"confirmed"`
 	BigCarNeeded bool   `json:"bigCarNeeded" bson:"bigCarNeeded"`
-	IsBig        bool   `json:"isBig" bson:"isBig"`
+	IsBig        bool   `json:"isBig" bson:"isBig,omitempty"`
 	Name         string `json:"name"`
 	Details      string `json:"details"`
 }
@@ -86,33 +87,7 @@ func (s *server) ridesHandler() http.HandlerFunc {
 			if err != nil {
 				logging.Error.Println(err)
 			}
-			ride.Name = ride.Driver + " ↦ " + ride.Destination
-
-			startSlice := strings.Split(strings.Split(ride.Start,"T")[1],":")
-			timeStartStr := startSlice[0] + ":" + startSlice[1]
-
-			if ride.Confirmed {
-				ride.Details = fmt.Sprintf(
-					"%s fährt mit dem %s um %s nach %s",
-					ride.Driver,
-					ride.CarName,
-					timeStartStr,
-					ride.Destination,
-				)
-			} else {
-				bigCarTxt := ""
-				if ride.BigCarNeeded {
-					bigCarTxt = "mit einem großen Auto "
-				}
-				ride.Details = fmt.Sprintf(
-					"%s möchte %sum %s nach %s fahren",
-					ride.Driver,
-					bigCarTxt,
-					timeStartStr,
-					ride.Destination,
-				)
-			}
-
+			ride = treatRide(ride)
 			rides = append(rides, ride)
 		}
 		if err := cur.Err(); err != nil {
@@ -125,7 +100,7 @@ func (s *server) ridesHandler() http.HandlerFunc {
 	}
 }
 
-func (s *server) rideHandler() http.HandlerFunc {
+func (s *server) rideAddHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			errorMsg := fmt.Sprintf("Invalid request method %s. POST is allowed only", r.Method)
@@ -152,8 +127,10 @@ func (s *server) rideHandler() http.HandlerFunc {
 			http.Error(w, errorMsg, http.StatusBadRequest)
 			return
 		}
+		payload.Id = primitive.NilObjectID
 
-		_, err = s.rides.InsertOne(context.TODO(), payload)
+		var result *mongo.InsertOneResult
+		result, err = s.rides.InsertOne(context.TODO(), payload)
 		if err != nil {
 			logging.Error.Printf("Unable writing ride %v to mongo: %v", payload, err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -161,7 +138,10 @@ func (s *server) rideHandler() http.HandlerFunc {
 		}
 
 		logging.Debug.Println("We got this record: ", body)
-		w.WriteHeader(http.StatusNoContent)
+		payload.Id = result.InsertedID.(primitive.ObjectID)
+		payload = treatRide(payload)
+		rideJson, _ := json.Marshal(payload)
+		fmt.Fprint(w, string(rideJson))
 	}
 }
 
@@ -193,4 +173,33 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 		}
 		w.WriteHeader(http.StatusNoContent)
 	}
+}
+
+func treatRide(ride ride) ride {
+	startSlice := strings.Split(strings.Split(ride.Start,"T")[1],":")
+	timeStartStr := startSlice[0] + ":" + startSlice[1]
+
+	ride.Name = ride.Driver + " ↦ " + ride.Destination
+	if ride.Confirmed {
+		ride.Details = fmt.Sprintf(
+			"%s fährt mit dem %s um %s nach %s",
+			ride.Driver,
+			ride.CarName,
+			timeStartStr,
+			ride.Destination,
+		)
+	} else {
+		bigCarTxt := ""
+		if ride.BigCarNeeded {
+			bigCarTxt = "mit einem großen Auto "
+		}
+		ride.Details = fmt.Sprintf(
+			"%s möchte %sum %s nach %s fahren",
+			ride.Driver,
+			bigCarTxt,
+			timeStartStr,
+			ride.Destination,
+		)
+	}
+	return ride
 }

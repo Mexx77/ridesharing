@@ -75,10 +75,10 @@
             ...mapState('account', ['status']),
             showLoginForm: {
                 get () {
-                    return this.$store.state.users.showLoginForm
+                    return this.$store.state.user.showLoginForm
                 },
                 set (v) {
-                    this.$store.commit('users/setShowLoginForm', v)
+                    this.$store.commit('user/setShowLoginForm', v)
                 }
             }
         },

@@ -79,7 +79,6 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 		expirationTime := time.Now().Add(tokenExpiryTimeMinutes * time.Minute)
 		claims := &Claims{
 			Username: payload.Username,
-			IsAdmin: user.IsAdmin,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: expirationTime.Unix(),
 			},
@@ -181,11 +180,22 @@ func (s *server) adminOnly(h http.HandlerFunc) http.HandlerFunc {
 		tknStr := r.Header.Get("Authorization")
 		claims, err := s.tokenIsValid(tknStr)
 		if err != nil {
-			logging.Warning.Println(err)
+			logging.Warning.Printf("Token invalid: %s", err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
-		} else if !claims.IsAdmin {
-			logging.Warning.Println("Token is valid but this route is for admins only")
+		}
+		findPipeline := bson.D{
+			{"username", claims.Username},
+		}
+		var user user
+		err = s.users.FindOne(context.TODO(),findPipeline).Decode(&user)
+		if err != nil {
+			logging.Error.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if !user.IsAdmin {
+			logging.Warning.Printf("Token is valid but this route is admins-only (user %s)", claims.Username)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

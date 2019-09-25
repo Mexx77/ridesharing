@@ -125,30 +125,23 @@
                 </v-card>
             </v-form>
         </v-dialog>
-        <v-snackbar v-model="snackbar" :color="snackbarColor">{{ snackbarText }}</v-snackbar>
     </v-row>
 </template>
 
 <script>
-    import * as constants from '../_services/constants'
+    import {mapActions} from 'vuex'
 
     export default {
         data() {
             return {
-                driver: '',
-                destination: '',
                 formIsValid: false,
                 menuStartTime: false,
                 menuEndTime: false,
-                bigCarNeeded: false,
-                snackbar: false,
-                snackbarText: '',
-                snackbarColor: 'success'
             }
         },
         computed: {
             focus () {
-                return this.$store.state.rides.focus
+                return this.$store.state.ride.focus
             },
             germanDate() {
                 if (this.focus == undefined) return undefined
@@ -157,73 +150,58 @@
             },
             startTime: {
                 get () {
-                    return this.$store.state.rides.startTime
+                    return this.$store.state.ride.startTime
                 },
                 set (value) {
-                    this.$store.commit('rides/setStartTime', value)
+                    this.$store.commit('ride/setStartTime', value)
                 }
             },
             endTime: {
                 get () {
-                    return this.$store.state.rides.endTime
+                    return this.$store.state.ride.endTime
                 },
                 set (value) {
-                    this.$store.commit('rides/setEndTime', value)
+                    this.$store.commit('ride/setEndTime', value)
                 }
             },
             showAddEventForm: {
                 get () {
-                    return this.$store.state.rides.showAddEventForm
+                    return this.$store.state.ride.showAddEventForm
                 },
                 set (value) {
-                    this.$store.commit('rides/setShowAddEventForm', value)
+                    this.$store.commit('ride/setShowAddEventForm', value)
+                }
+            },
+            driver: {
+                get () {
+                    return this.$store.state.ride.driver
+                },
+                set (value) {
+                    this.$store.commit('ride/setDriver', value)
+                }
+            },
+            destination: {
+                get () {
+                    return this.$store.state.ride.destination
+                },
+                set (value) {
+                    this.$store.commit('ride/setDestination', value)
+                }
+            },
+            bigCarNeeded: {
+                get () {
+                    return this.$store.state.ride.bigCarNeeded
+                },
+                set (value) {
+                    this.$store.commit('ride/setBigCarNeeded', value)
                 }
             }
         },
         methods: {
+            ...mapActions('ride', ['addRide']),
             validateAndSubmitForm() {
                 if (this.$refs.form.validate()) {
-                    this.showAddEventForm = false;
-                    this.$http
-                        .post(constants.hostname + '/ride', {
-                            driver: this.driver,
-                            destination: this.destination,
-                            start: `${this.focus}T${this.startTime}:00`,
-                            end: `${this.focus}T${this.endTime}:00`,
-                            bigCarNeeded: this.bigCarNeeded
-                        })
-                        .then(() => {
-                            this.snackbarText = 'Danke, deine Reservierungsanfrage wurde entgegengenommen';
-                            this.snackbarColor = 'success';
-                            this.snackbar = true;
-                        })
-                        .catch((error) => {
-                            // Error 😨
-                            if (error.response) {
-                                /*
-                                 * The request was made and the server responded with a
-                                 * status code that falls out of the range of 2xx
-                                 */
-                                this.snackbarText = 'Ups, der Server hat deine Anfrage verweigert';
-                                this.snackbarColor = 'error';
-                                this.snackbar = true;
-                            } else if (error.request) {
-                                /*
-                                 * The request was made but no response was received, `error.request`
-                                 * is an instance of XMLHttpRequest in the browser and an instance
-                                 * of http.ClientRequest in Node.js
-                                 */
-                                this.snackbarText = 'Ups, keine Antort vom Server erhalten. Netz?';
-                                this.snackbarColor = 'error';
-                                this.snackbar = true;
-                            } else {
-                                // Something happened in setting up the request and triggered an Error
-                                // eslint-disable-next-line
-                                this.snackbarText = 'Ups, konnte die Anfrage nicht schicken :(';
-                                this.snackbarColor = 'error';
-                                this.snackbar = true;
-                            }
-                        });
+                    this.addRide()
                 }
             },
             allowedMinutes: m => m % 15 == 0,

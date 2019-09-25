@@ -20,7 +20,7 @@
         <v-btn
                 icon
                 text
-                @click="$store.commit('users/setShowLoginForm', true)"
+                @click="$store.commit('user/setShowLoginForm', true)"
         >
           <v-icon>mdi-login-variant</v-icon>
         </v-btn>

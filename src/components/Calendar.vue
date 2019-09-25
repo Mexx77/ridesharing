@@ -46,7 +46,7 @@
                     ref="calendar"
                     v-model="focus"
                     color="primary"
-                    :events="events"
+                    :events="$store.state.ride.rides"
                     :event-color="getEventColor"
                     :event-text-color="getEventTextColor"
                     :event-margin-bottom="3"
@@ -60,22 +60,22 @@
                     @click:date="viewDay"
                     @click:time="addEvent"
                     @change="updateRange"
-            ></v-calendar>
+                ></v-calendar>
                 <RideCard/>
-                <AddEventForm/>
+                <AddUpdateRideForm/>
             </v-sheet>
         </v-col>
     </v-row>
 </template>
 
 <script>
-    import AddEventForm from "./AddEventForm";
+    import AddUpdateRideForm from "./AddUpdateRideForm";
     import RideCard from "./RideCard";
     import * as constants from "../_services/constants"
 
     export default {
         components: {
-            AddEventForm,
+            AddUpdateRideForm,
             RideCard
         },
         computed: {
@@ -114,10 +114,10 @@
             },
             focus: {
                 get () {
-                    return this.$store.state.rides.focus
+                    return this.$store.state.ride.focus
                 },
                 set (value) {
-                    this.$store.commit('rides/setFocus', value)
+                    this.$store.commit('ride/setFocus', value)
                 }
             },
         },
@@ -146,9 +146,9 @@
             },
             addEvent(time) {
                 this.focus = time.date
-                this.$store.commit('rides/setStartTime', this.roundMinutes(time.hour, time.minute))
+                this.$store.commit('ride/setStartTime', this.roundMinutes(time.hour, time.minute))
                 this.time = time
-                this.$store.commit('rides/setShowAddEventForm', true)
+                this.$store.commit('ride/setShowAddEventForm', true)
             },
             viewDay({date}) {
                 this.focus = date
@@ -175,13 +175,13 @@
             },
             showEvent({nativeEvent, event}) {
                 const open = () => {
-                    this.$store.commit('rides/setSelectedEvent', event)
-                    this.$store.commit('rides/setSelectedElement', nativeEvent.target)
-                    setTimeout(() => this.$store.commit('rides/setSelectedOpen', true), 10)
+                    this.$store.commit('ride/setSelectedEvent', event)
+                    this.$store.commit('ride/setSelectedElement', nativeEvent.target)
+                    setTimeout(() => this.$store.commit('ride/setSelectedOpen', true), 10)
                 }
 
-                if (this.$store.state.rides.selectedOpen) {
-                    this.$store.commit('rides/setSelectedOpen', false)
+                if (this.$store.state.ride.selectedOpen) {
+                    this.$store.commit('ride/setSelectedOpen', false)
                     setTimeout(open, 10)
                 } else {
                     open()
@@ -193,7 +193,7 @@
                 this.$http
                     .get(constants.hostname + '/rides?start=' + start.date + '&end=' + end.date)
                     .then((response) => {
-                        this.events = response.data
+                        this.$store.commit('ride/setRides', response.data)
                     });
             },
             nth(d) {
@@ -216,7 +216,7 @@
             this.$http
                 .get(constants.hostname + '/rides?start=' + this.today  + '&end=' + this.fourDaysFromNow() )
                 .then((response) => {
-                    this.events = response.data
+                    this.$store.commit('ride/setRides', response.data)
                 });
         },
         data() {
@@ -230,7 +230,6 @@
                     day: 'Tag',
                     '4day': '4 Tage',
                 },
-                events: [],
             }
         }
     }
