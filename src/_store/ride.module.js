@@ -15,6 +15,7 @@ const state = {
     rides: [],
     isUpdate: false,
     carName: '',
+    id: '',
 };
 
 const actions = {
@@ -80,6 +81,7 @@ const mutations = {
                 state.endTime = state.selectedEvent.endTime
                 state.bigCarNeeded = state.selectedEvent.bigCarNeeded
                 state.carName = state.selectedEvent.carName
+                state.id = state.selectedEvent.id
             }
         } else {
             state.isUpdate = false
@@ -90,6 +92,7 @@ const mutations = {
             state.bigCarNeeded = false
             state.carName = ""
             state.carColor = ""
+            state.id = ""
         }
         state.showAddEventForm = v
     },

@@ -128,7 +128,7 @@
                                         label="Ich brauche ein großes Auto"
                                     ></v-switch>
                                     <v-btn @click="showAddEventForm = false">Abbrechen</v-btn>
-                                    <v-btn @click="validateAndSubmitForm">{{isAdmin ? 'Speichern' : 'Anfragen'}}</v-btn>
+                                    <v-btn @click="validateAndSubmitForm">{{saveButtonText}}</v-btn>
                                 </v-col>
                             </v-row>
                         </v-container>
@@ -154,7 +154,16 @@
             }
         },
         computed: {
-            focus () {
+            saveButtonText() {
+                if(this.isUpdate){
+                    return 'Fahrt aktualisieren'
+                } else if (this.isAdmin){
+                    return 'hinzufügen'
+                } else {
+                    return 'anfragen'
+                }
+            },
+            focus() {
                 return this.$store.state.ride.focus
             },
             germanDate() {
