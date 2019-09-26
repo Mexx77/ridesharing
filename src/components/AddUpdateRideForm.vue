@@ -141,6 +141,7 @@
 
 <script>
     import {mapActions} from 'vuex'
+    const constants = require('../_services/constants')
 
     export default {
         data() {
@@ -148,7 +149,7 @@
                 formIsValid: false,
                 menuStartTime: false,
                 menuEndTime: false,
-                cars: ['Red Bus', 'White Bus', 'e-Auto', 'Little Red']
+                cars: constants.cars
             }
         },
         computed: {

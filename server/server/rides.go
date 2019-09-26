@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
 )
 
@@ -46,42 +45,16 @@ func (s *server) ridesHandler() http.HandlerFunc {
 			end = end + "T23:59:59"
 		}
 
-		ridesCarsPipeline := bson.A{
-			bson.D{
-				{"$match", bson.D{
-					{"start", bson.D{{"$gt", start}}},
-					{"end", bson.D{{"$lt", end}}},
-				}},
-			},
-			bson.D{
-				{"$lookup", bson.D{
-					{"from", "cars"},
-					{"localField", "carName"},
-					{"foreignField", "carName"},
-					{"as", "fromCars"},
-				}},
-			},
-			bson.D{
-				{"$replaceRoot", bson.D{{
-					"newRoot", bson.D{
-						{"$mergeObjects", bson.A{
-							bson.D{{
-								"$arrayElemAt", bson.A{"$fromCars", 0},
-							}},
-							"$$ROOT",
-						}},
-					},
-				}}},
-			},
-			bson.D{{"$project", bson.D{{"fromCars", 0}}}},
+		filter := bson.D{
+			{"start", bson.D{{"$gt", start}}},
+			{"end", bson.D{{"$lt", end}}},
 		}
-
-		rides := make([]ride, 0)
-
-		cur, err := s.rides.Aggregate(context.TODO(), ridesCarsPipeline, options.Aggregate())
+		cur, err := s.rides.Find(context.TODO(), filter)
 		if err != nil {
 			logging.Error.Print(err)
 		}
+
+		rides := make([]ride, 0)
 		for cur.Next(context.TODO()) {
 			var ride ride
 			err := cur.Decode(&ride)

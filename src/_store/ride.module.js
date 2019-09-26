@@ -1,4 +1,5 @@
 import {rideService} from "../_services/ride.service";
+import {carProperties} from "../_services/constants";
 
 const state = {
     driver: '',
@@ -32,7 +33,10 @@ const actions = {
             startTime: state.startTime,
             endTime: state.endTime,
             bigCarNeeded: state.bigCarNeeded,
-            carName: state.carName
+        }
+        if(state.carName !== ""){
+            ride.carName = state.carName
+            ride.carColor = carProperties[ride.carName].color
         }
         rideService.add(ride).then(
             data => {
@@ -81,7 +85,7 @@ const mutations = {
                 state.startTime = ""
                 state.endTime = ""
                 state.bigCarNeeded = false
-                state.carName = ''
+                state.carName = ""
             }
         }
         state.showAddEventForm = v
