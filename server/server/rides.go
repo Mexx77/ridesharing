@@ -11,22 +11,23 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
-	"strings"
 )
 
 type ride struct {
 	Id 			 primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Driver       string `json:"driver"`
-	CarName      string `json:"carName" bson:"carName"`
-	CarColor     string `json:"carColor" bson:"carColor,omitempty"`
+	CarName      string `json:"carName,omitempty" bson:"carName,omitempty"`
+	CarColor     string `json:"carColor,omitempty" bson:"carColor,omitempty"`
 	Destination  string `json:"destination"`
 	Start        string `json:"start"`
 	End          string `json:"end"`
+	StartTime    string `json:"startTime" bson:"startTime,omitempty"`
+	EndTime      string `json:"endTime" bson:"endTime,omitempty"`
 	Confirmed    bool   `json:"confirmed"`
 	BigCarNeeded bool   `json:"bigCarNeeded" bson:"bigCarNeeded"`
 	IsBig        bool   `json:"isBig" bson:"isBig,omitempty"`
-	Name         string `json:"name"`
-	Details      string `json:"details"`
+	Name         string `json:"name" bson:"-"`
+	Details      string `json:"details" bson:"-"`
 }
 
 func (s *server) ridesHandler() http.HandlerFunc {
@@ -176,16 +177,13 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 }
 
 func treatRide(ride ride) ride {
-	startSlice := strings.Split(strings.Split(ride.Start,"T")[1],":")
-	timeStartStr := startSlice[0] + ":" + startSlice[1]
-
 	ride.Name = ride.Driver + " ↦ " + ride.Destination
 	if ride.Confirmed {
 		ride.Details = fmt.Sprintf(
 			"%s fährt mit dem %s um %s nach %s",
 			ride.Driver,
 			ride.CarName,
-			timeStartStr,
+			ride.StartTime,
 			ride.Destination,
 		)
 	} else {
@@ -197,7 +195,7 @@ func treatRide(ride ride) ride {
 			"%s möchte %sum %s nach %s fahren",
 			ride.Driver,
 			bigCarTxt,
-			timeStartStr,
+			ride.StartTime,
 			ride.Destination,
 		)
 	}

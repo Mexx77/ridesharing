@@ -11,27 +11,32 @@ const state = {
     selectedOpen: false,
     selectedEvent: {},
     selectedElement: null,
-    rides: []
+    rides: [],
+    isUpdate: false,
+    carName: '',
 };
 
 const actions = {
-    delete({ commit }, id) {
+    delete({commit}, id) {
         rideService.delete(id)
-          .then(
-            () => commit('deleteSuccess', id),
-          );
+            .then(
+                () => commit('deleteSuccess', id),
+            );
     },
-    addRide({ commit, dispatch }) {
+    addRide({commit, dispatch}) {
         const ride = {
             driver: state.driver,
             destination: state.destination,
             start: `${state.focus}T${state.startTime}:00`,
             end: `${state.focus}T${state.endTime}:00`,
-            bigCarNeeded: state.bigCarNeeded
+            startTime: state.startTime,
+            endTime: state.endTime,
+            bigCarNeeded: state.bigCarNeeded,
+            carName: state.carName
         }
         rideService.add(ride).then(
             data => {
-                commit('setShowAddEventForm', false)
+                commit('showAddUpdateRideForm', false)
                 const newRides = state.rides.concat([data])
                 commit('setRides', newRides)
                 dispatch('alert/success', {
@@ -56,16 +61,34 @@ const mutations = {
     setBigCarNeeded: (state, v) => state.bigCarNeeded = v,
     setStartTime: (state, v) => state.startTime = v,
     setEndTime: (state, v) => state.endTime = v,
-    setShowAddEventForm: (state, v) => {
-        if(v) {
-            state.driver = state.selectedEvent.driver ? state.selectedEvent.driver : state.driver
-            state.destination = state.selectedEvent.destination ? state.selectedEvent.destination : state.destination
+    setCarName: (state, v) => state.carName = v,
+    showAddUpdateRideForm: (state, v) => {
+        if (v) {
+            if (Object.keys(state.selectedEvent).length !== 0) {
+                state.isUpdate = true
+                state.driver = state.selectedEvent.driver
+                state.destination = state.selectedEvent.destination
+                state.startTime = state.selectedEvent.startTime
+                state.endTime = state.selectedEvent.endTime
+                state.bigCarNeeded = state.selectedEvent.bigCarNeeded
+                state.carName = state.selectedEvent.carName
+            }
+        } else {
+            if (Object.keys(state.selectedEvent).length !== 0) {
+                state.isUpdate = false
+                state.driver = ""
+                state.destination = ""
+                state.startTime = ""
+                state.endTime = ""
+                state.bigCarNeeded = false
+                state.carName = ''
+            }
         }
         state.showAddEventForm = v
     },
     setFocus: (state, v) => state.focus = v,
     setSelectedOpen: (state, v) => {
-        if(!v) {
+        if (!v) {
             state.selectedEvent = {}
         }
         state.selectedOpen = v

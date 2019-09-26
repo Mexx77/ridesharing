@@ -74,7 +74,7 @@
                 this.delete(this.selectedEvent.id)
             },
             editRide() {
-                this.$store.commit('ride/setShowAddEventForm', true)
+                this.$store.commit('ride/showAddUpdateRideForm', true)
             },
             getEventColor: helper.getEventColor,
             getEventTextColor: helper.getEventTextColor

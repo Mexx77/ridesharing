@@ -149,7 +149,7 @@
                 this.focus = time.date
                 this.$store.commit('ride/setStartTime', this.roundMinutes(time.hour, time.minute))
                 this.time = time
-                this.$store.commit('ride/setShowAddEventForm', true)
+                this.$store.commit('ride/showAddUpdateRideForm', true)
             },
             viewDay({date}) {
                 this.focus = date

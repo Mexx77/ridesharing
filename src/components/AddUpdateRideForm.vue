@@ -1,20 +1,21 @@
 <template>
     <v-row justify="center">
         <v-dialog
-                v-model="showAddEventForm"
-                :fullscreen="$vuetify.breakpoint.smAndDown ? true : false"
-                hide-overlay max-width="600px"
+            v-model="showAddEventForm"
+            :fullscreen="$vuetify.breakpoint.smAndDown"
+            hide-overlay max-width="600px"
         >
             <v-form
-                    ref="form"
-                    v-model="formIsValid"
-                    lazy-validation
+                ref="form"
+                v-model="formIsValid"
+                lazy-validation
             >
                 <v-card>
                     <v-toolbar color="primary" dark>
                         <v-toolbar-title>
                             <v-icon class="pb-1">mdi-car</v-icon>
-                            Reservierung am {{germanDate}}
+                            <span v-if="isUpdate"> Fahrt {{selectedEvent.name}}</span>
+                            <span v-else> Reservierung am {{germanDate}}</span>
                         </v-toolbar-title>
                     </v-toolbar>
                     <v-card-text class="pb-0">
@@ -22,86 +23,96 @@
                             <v-row>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                     <v-text-field
-                                            v-model="driver"
-                                            prepend-icon="mdi-account"
-                                            label="Fahrer*"
-                                            :rules="[v => !!v || 'Name des Fahrers benötigt']"
-                                            required
+                                        v-model="driver"
+                                        prepend-icon="mdi-account"
+                                        label="Fahrer*"
+                                        :rules="[v => !!v || 'Name des Fahrers benötigt']"
+                                        required
                                     ></v-text-field>
                                 </v-col>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                     <v-combobox
-                                            v-model="destination"
-                                            prepend-icon="mdi-city"
-                                            :items="['Lüneburg', 'Dannenberg', 'Hitzacker']"
-                                            label="Fahrtziel*"
-                                            :rules="[v => !!v || 'Fahrtziel benötigt']"
-                                            required
+                                        v-model="destination"
+                                        prepend-icon="mdi-city"
+                                        :items="['Lüneburg', 'Dannenberg', 'Hitzacker']"
+                                        label="Fahrtziel*"
+                                        :rules="[v => !!v || 'Fahrtziel benötigt']"
+                                        required
                                     ></v-combobox>
                                 </v-col>
                             </v-row>
                             <v-row>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                     <v-menu
-                                            v-model="menuStartTime"
-                                            :close-on-content-click="false"
-                                            :nudge-right="40"
-                                            transition="scale-transition"
-                                            offset-y
-                                            full-width
-                                            min-width="272px"
+                                        v-model="menuStartTime"
+                                        :close-on-content-click="false"
+                                        :nudge-right="40"
+                                        transition="scale-transition"
+                                        offset-y
+                                        full-width
+                                        min-width="272px"
                                     >
                                         <template v-slot:activator="{ on }">
                                             <v-text-field
-                                                    v-model="startTime"
-                                                    label="Startzeit"
-                                                    prepend-icon="mdi-calendar-clock"
-                                                    readonly
-                                                    v-on="on"
-                                                    :rules="[v => !!v || 'Startzeit benötigt']"
+                                                v-model="startTime"
+                                                label="Startzeit"
+                                                prepend-icon="mdi-calendar-clock"
+                                                readonly
+                                                v-on="on"
+                                                :rules="[v => !!v || 'Startzeit benötigt']"
                                             ></v-text-field>
                                         </template>
                                         <v-time-picker
-                                                v-model="startTime"
-                                                color="primary"
-                                                :width="272"
-                                                format="24hr"
-                                                required
-                                                :allowed-minutes="allowedMinutes"
+                                            v-model="startTime"
+                                            color="primary"
+                                            :width="272"
+                                            format="24hr"
+                                            required
+                                            :allowed-minutes="allowedMinutes"
                                         ></v-time-picker>
                                     </v-menu>
 
                                 </v-col>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                     <v-menu
-                                            v-model="menuEndTime"
-                                            :close-on-content-click="false"
-                                            :nudge-right="40"
-                                            transition="scale-transition"
-                                            offset-y
-                                            full-width
-                                            min-width="272px"
+                                        v-model="menuEndTime"
+                                        :close-on-content-click="false"
+                                        :nudge-right="40"
+                                        transition="scale-transition"
+                                        offset-y
+                                        full-width
+                                        min-width="272px"
                                     >
                                         <template v-slot:activator="{ on }">
                                             <v-text-field
-                                                    v-model="endTime"
-                                                    label="Zeit der Rückgabe"
-                                                    prepend-icon="mdi-calendar-clock"
-                                                    readonly
-                                                    v-on="on"
-                                                    :rules="[v => !!v || 'Zeit der Rückgabe benötigt']"
+                                                v-model="endTime"
+                                                label="Zeit der Rückgabe"
+                                                prepend-icon="mdi-calendar-clock"
+                                                readonly
+                                                v-on="on"
+                                                :rules="[v => !!v || 'Zeit der Rückgabe benötigt']"
                                             ></v-text-field>
                                         </template>
                                         <v-time-picker
-                                                v-model="endTime"
-                                                color="primary"
-                                                :width="272"
-                                                format="24hr"
-                                                :min="startTime"
-                                                required
-                                                :allowed-minutes="allowedMinutes"
+                                            v-model="endTime"
+                                            color="primary"
+                                            :width="272"
+                                            format="24hr"
+                                            :min="startTime"
+                                            required
+                                            :allowed-minutes="allowedMinutes"
                                         ></v-time-picker>
                                     </v-menu>
+                                </v-col>
+                            </v-row>
+                            <v-row v-if="isAdmin">
+                                <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
+                                    <v-select
+                                        v-model="carName"
+                                        prepend-icon="mdi-car"
+                                        label="Auto*"
+                                        :items="cars"
+                                    ></v-select>
                                 </v-col>
                             </v-row>
                         </v-container>
@@ -111,12 +122,12 @@
                             <v-row dense>
                                 <v-col>
                                     <v-switch
-                                            class="mt-0"
-                                            v-model="bigCarNeeded"
-                                            label="Ich brauche ein großes Auto"
+                                        class="mt-0"
+                                        v-model="bigCarNeeded"
+                                        label="Ich brauche ein großes Auto"
                                     ></v-switch>
                                     <v-btn @click="showAddEventForm = false">Abbrechen</v-btn>
-                                    <v-btn @click="validateAndSubmitForm">Anfragen</v-btn>
+                                    <v-btn @click="validateAndSubmitForm">{{isAdmin ? 'Speichern' : 'Anfragen'}}</v-btn>
                                 </v-col>
                             </v-row>
                         </v-container>
@@ -137,6 +148,7 @@
                 formIsValid: false,
                 menuStartTime: false,
                 menuEndTime: false,
+                cars: ['Red Bus', 'White Bus', 'e-Auto', 'Little Red']
             }
         },
         computed: {
@@ -169,7 +181,7 @@
                     return this.$store.state.ride.showAddEventForm
                 },
                 set (value) {
-                    this.$store.commit('ride/setShowAddEventForm', value)
+                    this.$store.commit('ride/showAddUpdateRideForm', value)
                 }
             },
             driver: {
@@ -195,13 +207,38 @@
                 set (value) {
                     this.$store.commit('ride/setBigCarNeeded', value)
                 }
-            }
+            },
+            selectedEvent: {
+                get () {
+                    return this.$store.state.ride.selectedEvent
+                }
+            },
+            isUpdate: {
+                get () {
+                    return this.$store.state.ride.isUpdate
+                }
+            },
+            isAdmin: function () {
+                return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
+            },
+            carName: {
+                get () {
+                    return this.$store.state.ride.carName
+                },
+                set (value) {
+                    this.$store.commit('ride/setCarName', value)
+                }
+            },
         },
         methods: {
-            ...mapActions('ride', ['addRide']),
+            ...mapActions('ride', ['addRide', 'updateRide']),
             validateAndSubmitForm() {
                 if (this.$refs.form.validate()) {
-                    this.addRide()
+                    if (this.isUpdate) {
+                        this.updateRide()
+                    } else {
+                        this.addRide()
+                    }
                 }
             },
             allowedMinutes: m => m % 15 == 0,
