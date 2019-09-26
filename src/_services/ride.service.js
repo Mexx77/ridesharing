@@ -20,7 +20,7 @@ function _delete(id) {
 function add(ride) {
     const requestOptions = {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: authHeader(),
         body: JSON.stringify(ride),
     };
 

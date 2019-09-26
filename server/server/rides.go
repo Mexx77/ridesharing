@@ -22,9 +22,7 @@ type ride struct {
 	End          string `json:"end"`
 	StartTime    string `json:"startTime" bson:"startTime,omitempty"`
 	EndTime      string `json:"endTime" bson:"endTime,omitempty"`
-	Confirmed    bool   `json:"confirmed"`
 	BigCarNeeded bool   `json:"bigCarNeeded" bson:"bigCarNeeded"`
-	IsBig        bool   `json:"isBig" bson:"isBig,omitempty"`
 	Name         string `json:"name" bson:"-"`
 	Details      string `json:"details" bson:"-"`
 }
@@ -103,6 +101,14 @@ func (s *server) rideAddHandler() http.HandlerFunc {
 		}
 		payload.Id = primitive.NilObjectID
 
+		if payload.CarName != "" {
+			logging.Info.Println("wants to set carName. Checking if admin...")
+			if !s.isAdmin(r) {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+		}
+
 		var result *mongo.InsertOneResult
 		result, err = s.rides.InsertOne(context.TODO(), payload)
 		if err != nil {
@@ -151,7 +157,7 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 
 func treatRide(ride ride) ride {
 	ride.Name = ride.Driver + " ↦ " + ride.Destination
-	if ride.Confirmed {
+	if ride.CarName != "" {
 		ride.Details = fmt.Sprintf(
 			"%s fährt mit dem %s um %s nach %s",
 			ride.Driver,

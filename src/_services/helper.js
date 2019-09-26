@@ -1,5 +1,5 @@
 export function getEventColor(event) {
-    return event.confirmed && event.carColor ? event.carColor : 'grey';
+    return event.carColor ? event.carColor : 'grey';
 }
 
 export function getEventTextColor(event) {

@@ -110,8 +110,9 @@
                                     <v-select
                                         v-model="carName"
                                         prepend-icon="mdi-car"
-                                        label="Auto*"
+                                        label="Auto"
                                         :items="cars"
+                                        clearable
                                     ></v-select>
                                 </v-col>
                             </v-row>

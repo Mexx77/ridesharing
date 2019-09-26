@@ -177,30 +177,32 @@ func (s *server) loggedInOnly(h http.HandlerFunc) http.HandlerFunc {
 
 func (s *server) adminOnly(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tknStr := r.Header.Get("Authorization")
-		claims, err := s.tokenIsValid(tknStr)
-		if err != nil {
-			logging.Warning.Printf("Token invalid: %s", err)
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		findPipeline := bson.D{
-			{"username", claims.Username},
-		}
-		var user user
-		err = s.users.FindOne(context.TODO(),findPipeline).Decode(&user)
-		if err != nil {
-			logging.Error.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		if !user.IsAdmin {
-			logging.Warning.Printf("Token is valid but this route is admins-only (user %s)", claims.Username)
+		if !s.isAdmin(r) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 		h(w, r)
 	}
+}
+
+func (s *server) isAdmin(r *http.Request) bool {
+	tknStr := r.Header.Get("Authorization")
+	claims, err := s.tokenIsValid(tknStr)
+	if err != nil {
+		logging.Warning.Printf("Token invalid: %s", err)
+		return false
+	}
+	var user user
+	err = s.users.FindOne(context.TODO(),bson.D{{"username", claims.Username}}).Decode(&user)
+	if err != nil {
+		logging.Error.Printf("Error finding user %s", err)
+		return false
+	}
+	if !user.IsAdmin {
+		logging.Warning.Printf("Token is valid but %s is not admin", claims.Username)
+		return false
+	}
+	return true
 }
 
 func (s *server) test() http.HandlerFunc {

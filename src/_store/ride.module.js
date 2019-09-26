@@ -24,7 +24,7 @@ const actions = {
                 () => commit('deleteSuccess', id),
             );
     },
-    addRide({commit, dispatch}) {
+    addRide({commit, dispatch, rootState}) {
         const ride = {
             driver: state.driver,
             destination: state.destination,
@@ -34,17 +34,21 @@ const actions = {
             endTime: state.endTime,
             bigCarNeeded: state.bigCarNeeded,
         }
-        if(state.carName !== ""){
+        if(state.carName !== "" && state.carName !== undefined){
             ride.carName = state.carName
             ride.carColor = carProperties[ride.carName].color
         }
         rideService.add(ride).then(
             data => {
+                let msg = 'Danke, deine Reservierungsanfrage wurde entgegengenommen'
+                if (rootState.account.status.loggedIn && rootState.account.user.isAdmin) {
+                    msg = 'Fahrt gespeichert'
+                }
                 commit('showAddUpdateRideForm', false)
                 const newRides = state.rides.concat([data])
                 commit('setRides', newRides)
                 dispatch('alert/success', {
-                    message: 'Danke, deine Reservierungsanfrage wurde entgegengenommen',
+                    message: msg,
                     visible: true
                 }, {root: true});
             },
@@ -78,15 +82,14 @@ const mutations = {
                 state.carName = state.selectedEvent.carName
             }
         } else {
-            if (Object.keys(state.selectedEvent).length !== 0) {
-                state.isUpdate = false
-                state.driver = ""
-                state.destination = ""
-                state.startTime = ""
-                state.endTime = ""
-                state.bigCarNeeded = false
-                state.carName = ""
-            }
+            state.isUpdate = false
+            state.driver = ""
+            state.destination = ""
+            state.startTime = ""
+            state.endTime = ""
+            state.bigCarNeeded = false
+            state.carName = ""
+            state.carColor = ""
         }
         state.showAddEventForm = v
     },
