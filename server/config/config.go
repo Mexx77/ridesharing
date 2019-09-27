@@ -8,28 +8,34 @@ import (
 var config *Config
 
 // env vars
-const environment = "ENVIRONMENT"
-const port 		  = "PORT"
-const mongoPw 	  = "MONGO_PW"
-const jwtSecret   = "JWT_SECRET"
+const environment   = "ENVIRONMENT"
+const port 		    = "PORT"
+const mongoPw 	    = "MONGO_PW"
+const mongoUsername = "MONGO_USERNAME"
+const mongoHost 	= "MONGO_HOST"
+const jwtSecret     = "JWT_SECRET"
 
 // build constants
 const DevEnvironment = "dev"
 
 type Config struct {
-	Environment string
-	Port        string
-	MongoPw     string
-	JwtSecret   []byte
+	Environment   string
+	Port          string
+	MongoPw       string
+	MongoUsername string
+	MongoHost     string
+	JwtSecret     []byte
 }
 
 func GetConfig() *Config {
 	if config == nil {
 		config = &Config{
-			Environment: getConfigString(environment, true),
-			Port:        getConfigString(port, true),
-			MongoPw:     getConfigString(mongoPw, false),
-			JwtSecret:   []byte(getConfigString(jwtSecret, false)),
+			Environment:   getConfigString(environment, true),
+			Port:          getConfigString(port, true),
+			MongoPw:       getConfigString(mongoPw, false),
+			MongoUsername: getConfigString(mongoUsername, true),
+			MongoHost:	   getConfigString(mongoHost, true),
+			JwtSecret:     []byte(getConfigString(jwtSecret, false)),
 		}
 		return config
 	} else {

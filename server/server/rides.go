@@ -95,7 +95,6 @@ func (s *server) rideAddHandler() http.HandlerFunc {
 			} else {
 				logging.Info.Print(body)
 			}
-
 			http.Error(w, errorMsg, http.StatusBadRequest)
 			return
 		}
@@ -117,8 +116,49 @@ func (s *server) rideAddHandler() http.HandlerFunc {
 			return
 		}
 
-		logging.Debug.Println("We got this record: ", body)
+		logging.Debug.Println("We add: ", body)
 		payload.Id = result.InsertedID.(primitive.ObjectID)
+		payload = treatRide(payload)
+		rideJson, _ := json.Marshal(payload)
+		fmt.Fprint(w, string(rideJson))
+	}
+}
+
+func (s *server) rideUpdateHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			errorMsg := fmt.Sprintf("Invalid request method %s. POST is allowed only", r.Method)
+			logging.Error.Print(errorMsg)
+			http.Error(w, errorMsg, http.StatusMethodNotAllowed)
+			return
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(r.Body)
+		body := buf.String()
+
+		var payload ride
+		err := json.Unmarshal(buf.Bytes(), &payload)
+		if err != nil {
+			errorMsg := "Cannot decode payload: " + err.Error()
+			logging.Error.Print(errorMsg)
+			if body == "" {
+				logging.Info.Print("[empty Body]")
+			} else {
+				logging.Info.Print(body)
+			}
+			http.Error(w, errorMsg, http.StatusBadRequest)
+			return
+		}
+
+		result, err := s.rides.ReplaceOne(context.TODO(), bson.D{{"_id", payload.Id}}, payload)
+		if err != nil {
+			logging.Error.Printf("Unable updating ride %v at mongo: %v", body, err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		logging.Debug.Printf("We updated %v: %s", result.ModifiedCount, body)
 		payload = treatRide(payload)
 		rideJson, _ := json.Marshal(payload)
 		fmt.Fprint(w, string(rideJson))

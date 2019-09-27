@@ -25,6 +25,39 @@ const actions = {
                 () => commit('deleteSuccess', id),
             );
     },
+    updateRide({commit, dispatch}) {
+        const ride = {
+            id: state.id,
+            driver: state.driver,
+            destination: state.destination,
+            start: `${state.focus}T${state.startTime}:00`,
+            end: `${state.focus}T${state.endTime}:00`,
+            startTime: state.startTime,
+            endTime: state.endTime,
+            bigCarNeeded: state.bigCarNeeded,
+        }
+        if(state.carName !== "" && state.carName !== undefined){
+            ride.carName = state.carName
+            ride.carColor = carProperties[ride.carName].color
+        }
+        rideService.update(ride).then(
+          data => {
+              const newRides = state.rides.filter(r => r.id !== state.id).concat([data])
+              commit('setRides', newRides)
+              commit('showAddUpdateRideForm', false)
+              dispatch('alert/success', {
+                  message: 'Fahrt erfolgreich aktualisiert',
+                  visible: true
+              }, {root: true});
+          },
+          () => {
+              dispatch('alert/error', {
+                  message: 'Ups, da ist was fehlgeschlagen - sorry',
+                  visible: true
+              }, {root: true});
+          }
+        )
+    },
     addRide({commit, dispatch, rootState}) {
         const ride = {
             driver: state.driver,

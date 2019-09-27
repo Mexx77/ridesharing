@@ -25,7 +25,7 @@ func NewServer() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(
-		"mongodb+srv://ridesharing:"+ conf.MongoPw +"@ridesharing-tscpu.gcp.mongodb.net/test?retryWrites=true&w=majority",
+		fmt.Sprintf("mongodb+srv://%s:%s@%s", conf.MongoUsername, conf.MongoPw, conf.MongoHost),
 	))
 	if err != nil {
 		panic(err)

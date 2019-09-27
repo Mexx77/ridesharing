@@ -206,6 +206,7 @@
             }
         },
         mounted: function () {
+            this.focus = this.today;
             this.$http
                 .get(constants.hostname + '/rides?start=' + this.today  + '&end=' + this.fourDaysFromNow() )
                 .then((response) => {

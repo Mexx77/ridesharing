@@ -15,6 +15,8 @@ docker build -t ridesharing .
 ## Run
 ```
 PORT=8080
+MONGO_HOST=
+MONGO_USERNAME=
 MONGO_PW=
 JWT_SECRET=
 docker run \
@@ -22,6 +24,8 @@ docker run \
  -e ENVIRONMENT=prod \
  -e PORT=$PORT \
  -e MONGO_PW=$MONGO_PW \
+ -e MONGO_USERNAME=$MONGO_USERNAME \
+ -e MONGO_HOST=$MONGO_HOST \
  -e JWT_SECRET=$JWT_SECRET \
  --name ridesharing \
  --rm \
