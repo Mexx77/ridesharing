@@ -14,16 +14,14 @@
                 :color="selectedEvent.getEventColor"
                 :style="{color: selectedEvent.getEventTextColor}"
             >
+                <v-btn v-if="isAdmin" icon small @click="editRide">
+                    <v-icon>mdi-pencil</v-icon>
+                </v-btn>
                 <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
                 <v-spacer></v-spacer>
-                <template v-if="isAdmin">
-                    <v-btn icon small @click="editRide">
-                        <v-icon>mdi-pencil</v-icon>
-                    </v-btn>
-                    <v-btn icon small @click="deleteRide">
-                        <v-icon>mdi-delete</v-icon>
-                    </v-btn>
-                </template>
+                <v-btn v-if="isAdmin" icon small @click="deleteRide">
+                    <v-icon>mdi-delete</v-icon>
+                </v-btn>
             </v-toolbar>
             <v-card-text>
                 <span v-html="selectedEvent.details"></span>
