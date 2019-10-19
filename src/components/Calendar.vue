@@ -139,15 +139,14 @@
                 const len = (String(base).length - String(nr).length) + 1;
                 return len > 0? new Array(len).join('0') + nr : nr;
             },
-            roundMinutes(hour, minute) {
+            roundMinutesAndPadZeros(hour, minute) {
                 const m = (((minute + 7.5) / 15 | 0) * 15) % 60
                 const h = ((((minute / 105) + .5) | 0) + hour) % 24
-                const twoDigitM = m === 0 ? '00' : m
-                return h + ':' + twoDigitM
+                return ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2)
             },
             addEvent(time) {
                 this.focus = time.date
-                this.$store.commit('ride/setStartTime', this.roundMinutes(time.hour, time.minute))
+                this.$store.commit('ride/setStartTime', this.roundMinutesAndPadZeros(time.hour, time.minute))
                 this.time = time
                 this.$store.commit('ride/showAddUpdateRideForm', true)
             },

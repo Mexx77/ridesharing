@@ -43,66 +43,26 @@
                             </v-row>
                             <v-row>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
-                                    <v-menu
-                                        v-model="menuStartTime"
-                                        :close-on-content-click="false"
-                                        :nudge-right="40"
-                                        transition="scale-transition"
-                                        offset-y
-                                        full-width
-                                        min-width="272px"
-                                    >
-                                        <template v-slot:activator="{ on }">
-                                            <v-text-field
-                                                v-model="startTime"
-                                                label="Startzeit"
-                                                prepend-icon="mdi-calendar-clock"
-                                                readonly
-                                                v-on="on"
-                                                :rules="[v => !!v || 'Startzeit benötigt']"
-                                            ></v-text-field>
-                                        </template>
-                                        <v-time-picker
-                                            v-model="startTime"
-                                            color="primary"
-                                            :width="272"
-                                            format="24hr"
-                                            required
-                                            :allowed-minutes="allowedMinutes"
-                                        ></v-time-picker>
-                                    </v-menu>
-
+                                    <v-text-field
+                                        prepend-icon="mdi-calendar-clock"
+                                        label="Startzeit"
+                                        v-model="startTime"
+                                        color="primary"
+                                        type="time"
+                                        suffix="Uhr"
+                                        format="24hr"
+                                    ></v-text-field>
                                 </v-col>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
-                                    <v-menu
-                                        v-model="menuEndTime"
-                                        :close-on-content-click="false"
-                                        :nudge-right="40"
-                                        transition="scale-transition"
-                                        offset-y
-                                        full-width
-                                        min-width="272px"
-                                    >
-                                        <template v-slot:activator="{ on }">
-                                            <v-text-field
-                                                v-model="endTime"
-                                                label="Zeit der Rückgabe"
-                                                prepend-icon="mdi-calendar-clock"
-                                                readonly
-                                                v-on="on"
-                                                :rules="[v => !!v || 'Zeit der Rückgabe benötigt']"
-                                            ></v-text-field>
-                                        </template>
-                                        <v-time-picker
-                                            v-model="endTime"
-                                            color="primary"
-                                            :width="272"
-                                            format="24hr"
-                                            :min="startTime"
-                                            required
-                                            :allowed-minutes="allowedMinutes"
-                                        ></v-time-picker>
-                                    </v-menu>
+                                    <v-text-field
+                                        prepend-icon="mdi-calendar-clock"
+                                        label="Zeit der Rückgabe"
+                                        v-model="endTime"
+                                        color="primary"
+                                        type="time"
+                                        suffix="Uhr"
+                                        format="24hr"
+                                    ></v-text-field>
                                 </v-col>
                             </v-row>
                             <v-row v-if="isAdmin">
@@ -148,8 +108,6 @@
         data() {
             return {
                 formIsValid: false,
-                menuStartTime: false,
-                menuEndTime: false,
                 cars: constants.cars
             }
         },
