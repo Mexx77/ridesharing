@@ -49,6 +49,7 @@
                                         v-model="startTime"
                                         color="primary"
                                         type="time"
+                                        step="600"
                                         suffix="Uhr"
                                         format="24hr"
                                     ></v-text-field>
@@ -60,6 +61,7 @@
                                         v-model="endTime"
                                         color="primary"
                                         type="time"
+                                        step="600"
                                         suffix="Uhr"
                                         format="24hr"
                                     ></v-text-field>
