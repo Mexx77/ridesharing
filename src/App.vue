@@ -30,7 +30,7 @@
     <v-content>
       <Calendar/>
       <LoginForm/>
-      <v-snackbar v-model="snackbar" :color="alert.type">{{ alert.message }}</v-snackbar>
+      <v-snackbar v-model="snackbar" timeout="10000" :color="alert.type">{{ alert.message }}</v-snackbar>
     </v-content>
     <v-footer>
       <v-spacer></v-spacer>
@@ -70,6 +70,7 @@ export default {
     if (this.$store.state.account.status.loggedIn) {
       this.$store.dispatch('account/refreshToken')
     }
+    this.$store.dispatch('alert/success', {message: '💡 Klicke ungefähr da, wo du eine Fahrt hinzuzufügen möchtest', visible: true})
   }
 };
 </script>
