@@ -1,14 +1,14 @@
 <template>
     <v-row justify="center">
         <v-dialog
-                v-model="showLoginForm"
-                :fullscreen="$vuetify.breakpoint.smAndDown"
-                hide-overlay max-width="300px"
+            v-model="showLoginForm"
+            :fullscreen="$vuetify.breakpoint.smAndDown"
+            hide-overlay max-width="400px"
         >
             <v-form
-                    ref="form"
-                    v-model="formIsValid"
-                    lazy-validation
+                ref="form"
+                v-model="formIsValid"
+                lazy-validation
             >
                 <v-card>
                     <v-toolbar color="primary" dark>
@@ -22,20 +22,20 @@
                             <v-row>
                                 <v-col cols="12">
                                     <v-text-field
-                                            v-model="username"
-                                            prepend-icon="mdi-account"
-                                            label="Benutzername*"
-                                            :rules="[v => !!v || 'Benutzername benötigt']"
-                                            required
+                                        v-model="username"
+                                        prepend-icon="mdi-account"
+                                        label="Benutzername*"
+                                        :rules="[v => !!v || 'Benutzername benötigt']"
+                                        required
                                     ></v-text-field>
                                     <v-text-field
-                                            v-model="password"
-                                            prepend-icon="mdi-lock-question"
-                                            :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                                            :rules="[v => !!v || 'Passwort benötigt']"
-                                            :type="showPassword ? 'text' : 'password'"
-                                            label="Passwort*"
-                                            @click:append="showPassword = !showPassword"
+                                        v-model="password"
+                                        prepend-icon="mdi-lock-question"
+                                        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                                        :rules="[v => !!v || 'Passwort benötigt']"
+                                        :type="showPassword ? 'text' : 'password'"
+                                        label="Passwort*"
+                                        @click:append="showPassword = !showPassword"
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
@@ -45,7 +45,13 @@
                         <v-container pt-0>
                             <v-row dense>
                                 <v-col>
+                                    <v-btn outlined>Registrieren</v-btn>
+                                </v-col>
+                                <v-spacer></v-spacer>
+                                <v-col>
                                     <v-btn @click="showLoginForm = false">Abbrechen</v-btn>
+                                </v-col>
+                                <v-col>
                                     <v-btn @click="handleLogin">Login</v-btn>
                                 </v-col>
                             </v-row>

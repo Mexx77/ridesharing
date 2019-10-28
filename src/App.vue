@@ -18,11 +18,11 @@
       </div>
       <div v-else>
         <v-btn
-                icon
-                text
-                @click="$store.commit('user/setShowLoginForm', true)"
+            color="primary"
+            text
+            @click="$store.commit('user/setShowLoginForm', true)"
         >
-          <v-icon>mdi-login-variant</v-icon>
+          <v-icon>mdi-login-variant</v-icon>&nbsp;Login
         </v-btn>
       </div>
     </v-app-bar>
@@ -30,7 +30,7 @@
     <v-content>
       <Calendar/>
       <LoginForm/>
-      <v-snackbar v-model="snackbar" timeout="10000" :color="alert.type">{{ alert.message }}</v-snackbar>
+      <v-snackbar v-model="snackbar" :timeout="10000" :color="alert.type">{{ alert.message }}</v-snackbar>
     </v-content>
     <v-footer>
       <v-spacer></v-spacer>
@@ -70,7 +70,10 @@ export default {
     if (this.$store.state.account.status.loggedIn) {
       this.$store.dispatch('account/refreshToken')
     }
-    this.$store.dispatch('alert/success', {message: '💡 Klicke ungefähr da, wo du eine Fahrt hinzuzufügen möchtest', visible: true})
+    this.$store.dispatch('alert/info', {
+      message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit der Fahrt',
+      visible: true}
+    )
   }
 };
 </script>

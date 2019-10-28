@@ -145,10 +145,16 @@
                 return ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2)
             },
             addEvent(time) {
-                this.focus = time.date
-                this.$store.commit('ride/setStartTime', this.roundMinutesAndPadZeros(time.hour, time.minute))
-                this.time = time
-                this.$store.commit('ride/showAddUpdateRideForm', true)
+                if (this.$store.state.account.status.loggedIn) {
+                    this.focus = time.date
+                    this.$store.commit('ride/setStartTime', this.roundMinutesAndPadZeros(time.hour, time.minute))
+                    this.time = time
+                    this.$store.commit('ride/showAddUpdateRideForm', true)
+                } else {
+                    this.$store.commit('alert/info', {message: '💡 Bitte melde dich an, um Fahrten hinzuzufügen', visible: true})
+                }
+
+
             },
             viewDay({date}) {
                 this.focus = date
@@ -227,3 +233,12 @@
         }
     }
 </script>
+
+<style scoped>
+    >>> .v-calendar-daily__day {
+        cursor: pointer;
+    }
+    >>> .v-calendar .v-event-timed {
+        font-size: 16px;
+    }
+</style>

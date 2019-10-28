@@ -84,9 +84,3 @@
         }
     }
 </script>
-
-<style>
-    .v-event-timed {
-        font-size: 16px !important;
-    }
-</style>

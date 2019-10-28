@@ -11,6 +11,9 @@ const actions = {
     error({ commit }, {message, visible}) {
         commit('error', {message, visible});
     },
+    info({ commit }, {message, visible}) {
+        commit('info', {message, visible});
+    },
     clear({ commit }) {
         commit('clear');
     },
@@ -27,6 +30,11 @@ const mutations = {
     },
     error(state, {message, visible}) {
         state.type = 'error';
+        state.message = message;
+        state.visible = visible;
+    },
+    info(state, {message, visible}) {
+        state.type = 'info';
         state.message = message;
         state.visible = visible;
     },
