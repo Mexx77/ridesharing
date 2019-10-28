@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const tokenExpiryTimeMinutes = 60
+const tokenExpiryTimeMinutes = 60 * 24
 
 type user struct {
 	Username string `json:"username"`
