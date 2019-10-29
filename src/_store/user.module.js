@@ -3,6 +3,7 @@ import { userService } from '../_services/user.service';
 const state = {
     all: {},
     showLoginForm: false,
+    showRegisterForm: false,
 };
 
 const actions = {
@@ -25,8 +26,11 @@ const actions = {
                 error => commit('deleteFailure', { id, error: error.toString() })
             );
     },
-    setShowLoginForm({ commit }, v) {
-        commit('setShowLoginForm', v);
+    showLoginForm({ commit }, v) {
+        commit('showLoginForm', v);
+    },
+    showRegisterForm({ commit }, v) {
+        commit('showRegisterForm', v);
     },
 };
 
@@ -65,7 +69,8 @@ const mutations = {
             return user;
         })
     },
-    setShowLoginForm: (state, v) => state.showLoginForm = v,
+    showLoginForm: (state, v) => state.showLoginForm = v,
+    showRegisterForm: (state, v) => state.showRegisterForm = v,
 };
 
 export const user = {

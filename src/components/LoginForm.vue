@@ -19,7 +19,7 @@
                     </v-toolbar>
                     <v-card-text class="pb-0">
                         <v-container pa-0>
-                            <v-row>
+                            <v-row dense>
                                 <v-col cols="12">
                                     <v-text-field
                                         v-model="username"
@@ -28,6 +28,8 @@
                                         :rules="[v => !!v || 'Benutzername benötigt']"
                                         required
                                     ></v-text-field>
+                                </v-col>
+                                <v-col cols="12">
                                     <v-text-field
                                         v-model="password"
                                         prepend-icon="mdi-lock-question"
@@ -45,7 +47,10 @@
                         <v-container pt-0>
                             <v-row dense>
                                 <v-col>
-                                    <v-btn outlined>Registrieren</v-btn>
+                                    <v-btn
+                                        outlined
+                                        @click="handleRegister"
+                                    >Registrieren</v-btn>
                                 </v-col>
                                 <v-spacer></v-spacer>
                                 <v-col>
@@ -84,7 +89,7 @@
                     return this.$store.state.user.showLoginForm
                 },
                 set (v) {
-                    this.$store.commit('user/setShowLoginForm', v)
+                    this.$store.commit('user/showLoginForm', v)
                 }
             }
         },
@@ -95,6 +100,10 @@
                     const { username, password } = this;
                     this.login({ username, password })
                 }
+            },
+            handleRegister() {
+                this.showLoginForm = false;
+                this.$store.dispatch('user/showRegisterForm', true)
             }
         }
     }

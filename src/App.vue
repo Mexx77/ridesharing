@@ -20,7 +20,7 @@
         <v-btn
             color="primary"
             text
-            @click="$store.commit('user/setShowLoginForm', true)"
+            @click="$store.dispatch('user/showLoginForm', true)"
         >
           <v-icon>mdi-login-variant</v-icon>&nbsp;Login
         </v-btn>
@@ -30,6 +30,7 @@
     <v-content>
       <Calendar/>
       <LoginForm/>
+      <RegisterForm/>
       <v-snackbar v-model="snackbar" :timeout="10000" :color="alert.type">{{ alert.message }}</v-snackbar>
     </v-content>
     <v-footer>
@@ -42,13 +43,15 @@
 <script>
 import Calendar from "./components/Calendar";
 import LoginForm from "./components/LoginForm";
+import RegisterForm from "./components/RegisterForm";
 import {mapState,mapActions} from 'vuex';
 
 export default {
   name: 'App',
   components: {
     Calendar,
-    LoginForm
+    LoginForm,
+    RegisterForm
   },
   computed: {
     ...mapState({
@@ -71,7 +74,7 @@ export default {
       this.$store.dispatch('account/refreshToken')
     }
     this.$store.dispatch('alert/info', {
-      message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit der Fahrt',
+      message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit',
       visible: true}
     )
   }
