@@ -12,20 +12,21 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
+	"regexp"
 	"time"
 )
 
 const tokenExpiryTimeMinutes = 60 * 24
 
 type user struct {
-	Firstname string `json:"firstName,omitempty"`
-	LastName  string `json:"lastName,omitempty"`
-	Phone     string `json:"phone,omitempty"`
-	Username  string `json:"username"`
-	Password  string `json:"password,omitempty"`
-	Token     string `json:"token"`
+	FirstName string    `json:"firstName,omitempty"`
+	LastName  string    `json:"lastName,omitempty"`
+	Phone     string    `json:"phone,omitempty"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password,omitempty"`
+	Token     string    `json:"token"`
 	Expires   time.Time `json:"expires"`
-	IsAdmin   bool   `json:"isAdmin" bson:"isAdmin"`
+	IsAdmin   bool      `json:"isAdmin" bson:"isAdmin"`
 }
 
 type Claims struct {
@@ -193,11 +194,65 @@ func (s *server) registerHandler() http.HandlerFunc {
 			} else {
 				logging.Info.Print(body)
 			}
-
 			http.Error(w, errorMsg, http.StatusBadRequest)
 			return
 		}
+		logging.Debug.Println("We got this new user to register:")
 		logging.Debug.Println(body)
+
+		if payload.FirstName == "" {
+			rsp := Response{ Message: "Vorname wird benötigt" }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusBadRequest)
+			return
+		}
+		if payload.LastName == "" {
+			rsp := Response{ Message: "Nachname wird benötigt" }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusBadRequest)
+			return
+		}
+		if payload.Username != "" {
+			if len(payload.Username) < 3 {
+				rsp := Response{ Message: "Benutzername muss mind. 3 Zeichen lang sein" }
+				rspJson, _ := json.Marshal(rsp)
+				http.Error(w, string(rspJson), http.StatusBadRequest)
+				return
+			}
+
+			filter := bson.D{{"username",  payload.Username}}
+			var user user
+			err := s.users.FindOne(context.TODO(), filter, options.FindOne()).Decode(&user)
+			if err == nil {
+				rsp := Response{ Message: fmt.Sprintf("Der Benutzername %s existiert bereits", payload.Username) }
+				rspJson, _ := json.Marshal(rsp)
+				http.Error(w, string(rspJson), http.StatusBadRequest)
+				return
+			} else if err != mongo.ErrNoDocuments {
+				logging.Error.Printf("Fehler beim Überprüfen eines neuen Benutzernamens: %s\n", err.Error())
+				rsp := Response{ Message: "Sorry, Fehler beim Prüfen des Benutzernamens" }
+				rspJson, _ := json.Marshal(rsp)
+				http.Error(w, string(rspJson), http.StatusBadRequest)
+				return
+			}
+		}
+
+		//TODO: match without regexp
+		if !passwordMatched {
+			logging.Debug.Println("password not matched " + payload.Password)
+			rsp := Response{ Message: "Passwort muss 1 Kleinbuchstabe, 1 Großbuchstabe, 1 Zahl enthalten und mind. 8 Zeichen lang sein" }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusBadRequest)
+			return
+		}
+		phoneMatched, _ := regexp.Match(`^01[567][0-9]{8,11}$`, []byte(payload.Phone))
+		if !phoneMatched {
+			rsp := Response{ Message: "Handy-Nr. muss im Format 01 {5,6,7} 12345678 [901] sein" }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusBadRequest)
+			return
+		}
+
 
 		w.WriteHeader(http.StatusNoContent)
 		//rsp := Response{ Message: "Password zu kurz" }

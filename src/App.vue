@@ -19,6 +19,7 @@
       <div v-else>
         <v-btn
             text
+            color="secondary"
             @click="$store.dispatch('user/showLoginForm', true)"
         >
           <v-icon>mdi-login-variant</v-icon>&nbsp;Anmelden

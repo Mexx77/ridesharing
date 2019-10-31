@@ -25,8 +25,7 @@
                                         v-model="user.firstName"
                                         prepend-icon="mdi-account-card-details-outline"
                                         label="Vorname*"
-                                        :rules="[rules.required]"
-                                        required
+                                        :rules="[rules.min2]"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
@@ -34,8 +33,7 @@
                                         v-model="user.lastName"
                                         prepend-icon="mdi-account-card-details-outline"
                                         label="Nachname*"
-                                        :rules="[rules.required]"
-                                        required
+                                        :rules="[rules.min2]"
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
@@ -47,7 +45,7 @@
                                         label="Benutzername"
                                         hint="Kann beim Login statt der Handy-Nr verwendet werden"
                                         persistent-hint
-                                        required
+                                        :rules="[rules.min3orEmpty]"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
@@ -73,7 +71,6 @@
                                         hint="Für Bestätigungen deiner Auto-Anfragen per SMS"
                                         persistent-hint
                                         :rules="[rules.phone]"
-                                        required
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
@@ -108,18 +105,19 @@
                     password: '',
                     phone: ''
                 },
-                showPassword: false,
+                showPassword: true,
                 formIsValid: false,
                 rules: {
                     required: value => !!value || 'Benötigt',
-                    min3: value => value.length >= 3 || 'mind. 3 Zeichen',
+                    min2: value => value.length >= 2 || 'mind. 2 Zeichen',
+                    min3orEmpty: value => (value === '' || value.length >= 3) || 'leer oder mind. 3 Zeichen',
                     password: value => {
-                        const pattern = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})");
+                        const pattern = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$");
                         return pattern.test(value) || this.passwordHint
                     },
                     phone: value => {
                         const pattern = new RegExp("^01[567][0-9]{8,11}$");
-                        return pattern.test(value) || 'deutsche Handynummer: 01 {5,6,7} 12345678 (901)'
+                        return pattern.test(value) || 'deutsche Handynummer: 01 {5,6,7} 12345678 [901]'
                     },
                 },
                 passwordHint: '1 Kleinbuchstabe, 1 Großbuchstabe, 1 Zahl, Länge ≥ 8'

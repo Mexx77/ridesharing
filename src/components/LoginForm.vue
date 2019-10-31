@@ -49,6 +49,7 @@
                                 <v-col>
                                     <v-btn
                                         text
+                                        color="primary"
                                         @click="handleRegister"
                                     >Registrieren</v-btn>
                                 </v-col>
