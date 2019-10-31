@@ -3,7 +3,7 @@
         <v-dialog
             v-model="showRegisterForm"
             :fullscreen="$vuetify.breakpoint.smAndDown"
-            hide-overlay max-width="400px"
+            hide-overlay max-width="500px"
         >
             <v-form
                 ref="form"
@@ -22,7 +22,7 @@
                             <v-row dense>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                     <v-text-field
-                                        v-model="vorname"
+                                        v-model="user.firstName"
                                         prepend-icon="mdi-account-card-details-outline"
                                         label="Vorname*"
                                         :rules="[rules.required]"
@@ -31,7 +31,7 @@
                                 </v-col>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                     <v-text-field
-                                        v-model="nachname"
+                                        v-model="user.lastName"
                                         prepend-icon="mdi-account-card-details-outline"
                                         label="Nachname*"
                                         :rules="[rules.required]"
@@ -42,19 +42,20 @@
                             <v-row dense>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                     <v-text-field
-                                        v-model="username"
+                                        v-model="user.username"
                                         prepend-icon="mdi-account"
-                                        label="Benutzername*"
-                                        :rules="[rules.required,rules.min3]"
+                                        label="Benutzername"
+                                        hint="Kann beim Login statt der Handy-Nr verwendet werden"
+                                        persistent-hint
                                         required
                                     ></v-text-field>
                                 </v-col>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                     <v-text-field
-                                        v-model="password"
+                                        v-model="user.password"
                                         prepend-icon="mdi-lock-question"
                                         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                                        hint="1 Kleinbuchstaben, 1 Großbuchstaben, 1 Zahl, Länge 8"
+                                        :hint="passwordHint"
                                         persistent-hint
                                         :rules="[rules.password]"
                                         :type="showPassword ? 'text' : 'password'"
@@ -66,12 +67,12 @@
                             <v-row dense>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
                                     <v-text-field
-                                        v-model="handy"
+                                        v-model="user.phone"
                                         prepend-icon="mdi-cellphone-iphone"
-                                        label="Handy-Nr.*"
-                                        hint="Für Fahrt-Bestätigungen per SMS"
+                                        label="dt. Handy-Nr.*"
+                                        hint="Für Bestätigungen deiner Auto-Anfragen per SMS"
                                         persistent-hint
-                                        :rules="[rules.required]"
+                                        :rules="[rules.phone]"
                                         required
                                     ></v-text-field>
                                 </v-col>
@@ -81,16 +82,12 @@
                     <v-card-actions class="mr-2 pb-4 pt-3">
                         <v-container pt-0>
                             <v-row dense>
-                                <v-spacer></v-spacer>
                                 <v-col>
                                     <v-btn @click="showRegisterForm = false">Abbrechen</v-btn>
-                                </v-col>
-                                <v-col>
-                                    <v-btn >Registrieren</v-btn>
+                                    <v-btn @click="handleRegister" :disabled="status.registering">Registrieren</v-btn>
                                 </v-col>
                             </v-row>
                         </v-container>
-
                     </v-card-actions>
                 </v-card>
             </v-form>
@@ -99,27 +96,33 @@
 </template>
 
 <script>
-    import { mapState } from 'vuex'
+    import { mapState, mapActions } from 'vuex'
 
     export default {
         data() {
             return {
-                vorname: '',
-                nachname: '',
-                username: '',
-                password: '',
-                handy: '',
+                user: {
+                    firstName: '',
+                    lastName: '',
+                    username: '',
+                    password: '',
+                    phone: ''
+                },
                 showPassword: false,
-                submitted: false,
                 formIsValid: false,
                 rules: {
                     required: value => !!value || 'Benötigt',
                     min3: value => value.length >= 3 || 'mind. 3 Zeichen',
                     password: value => {
                         const pattern = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})");
-                        return pattern.test(value) || '1 Kleinbuchstaben, 1 Großbuchstaben, 1 Zahl, Länge 8'
+                        return pattern.test(value) || this.passwordHint
+                    },
+                    phone: value => {
+                        const pattern = new RegExp("^01[567][0-9]{8,11}$");
+                        return pattern.test(value) || 'deutsche Handynummer: 01 {5,6,7} 12345678 (901)'
                     },
                 },
+                passwordHint: '1 Kleinbuchstabe, 1 Großbuchstabe, 1 Zahl, Länge ≥ 8'
             }
         },
         computed: {
@@ -134,7 +137,12 @@
             }
         },
         methods: {
-
+            ...mapActions('account', ['register']),
+            handleRegister() {
+                if (this.$refs.form.validate()) {
+                    this.register(this.user)
+                }
+            },
         }
     }
 </script>

@@ -18,17 +18,24 @@ import (
 const tokenExpiryTimeMinutes = 60 * 24
 
 type user struct {
-	Username string `json:"username"`
-	Password string `json:"password,omitempty"`
-	Token    string `json:"token"`
-	Expires  time.Time `json:"expires"`
-	IsAdmin  bool   `json:"isAdmin" bson:"isAdmin"`
+	Firstname string `json:"firstName,omitempty"`
+	LastName  string `json:"lastName,omitempty"`
+	Phone     string `json:"phone,omitempty"`
+	Username  string `json:"username"`
+	Password  string `json:"password,omitempty"`
+	Token     string `json:"token"`
+	Expires   time.Time `json:"expires"`
+	IsAdmin   bool   `json:"isAdmin" bson:"isAdmin"`
 }
 
 type Claims struct {
 	Username string `json:"username"`
 	IsAdmin  bool   `json:"isAdmin"`
 	jwt.StandardClaims
+}
+
+type Response struct {
+	Message string `json:"message"`
 }
 
 func (s *server) authenticateHandler() http.HandlerFunc {
@@ -160,6 +167,43 @@ func (s *server) validateTokenHandler() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func (s *server) registerHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			errorMsg := fmt.Sprintf("Invalid request method %s. POST is allowed only", r.Method)
+			logging.Error.Print(errorMsg)
+			http.Error(w, errorMsg, http.StatusMethodNotAllowed)
+			return
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(r.Body)
+		body := buf.String()
+
+		var payload user
+		err := json.Unmarshal(buf.Bytes(), &payload)
+		if err != nil {
+			errorMsg := "Cannot decode payload: " + err.Error()
+			logging.Error.Print(errorMsg)
+			if body == "" {
+				logging.Info.Print("[empty Body]")
+			} else {
+				logging.Info.Print(body)
+			}
+
+			http.Error(w, errorMsg, http.StatusBadRequest)
+			return
+		}
+		logging.Debug.Println(body)
+
+		w.WriteHeader(http.StatusNoContent)
+		//rsp := Response{ Message: "Password zu kurz" }
+		//rspJson, _ := json.Marshal(rsp)
+		//http.Error(w, string(rspJson), http.StatusBadRequest)
+		//return
 	}
 }
 

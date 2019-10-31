@@ -6,3 +6,4 @@ export const carProperties = {
     'e-Auto': { color: 'black', isBig: false },
     'Little Red': { color: '#EF5350', isBig: false }
 };
+export const brandName = 'Sammatz';

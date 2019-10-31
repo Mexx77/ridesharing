@@ -2,7 +2,7 @@
   <v-app>
     <v-app-bar app>
       <v-toolbar-title class="headline text-uppercase">
-        <span v-if="$vuetify.breakpoint.mdAndUp">Sammatz </span>
+        <span v-if="$vuetify.breakpoint.mdAndUp">{{brandName}} </span>
         <span class="font-weight-light">RIDESHARING</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
@@ -18,11 +18,10 @@
       </div>
       <div v-else>
         <v-btn
-            color="primary"
             text
             @click="$store.dispatch('user/showLoginForm', true)"
         >
-          <v-icon>mdi-login-variant</v-icon>&nbsp;Login
+          <v-icon>mdi-login-variant</v-icon>&nbsp;Anmelden
         </v-btn>
       </div>
     </v-app-bar>
@@ -45,6 +44,7 @@ import Calendar from "./components/Calendar";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import {mapState,mapActions} from 'vuex';
+import * as constants from "./_services/constants";
 
 export default {
   name: 'App',
@@ -52,6 +52,11 @@ export default {
     Calendar,
     LoginForm,
     RegisterForm
+  },
+  data() {
+    return {
+      brandName: constants.brandName
+    }
   },
   computed: {
     ...mapState({

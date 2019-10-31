@@ -11,5 +11,6 @@ func (s *server) routes() {
 	http.HandleFunc("/ride/delete", s.addCORSHeader(s.adminOnly(s.rideDeleteHandler())))
 	http.HandleFunc("/users/authenticate", s.addCORSHeader(s.authenticateHandler()))
 	http.HandleFunc("/users/refreshToken", s.addCORSHeader(s.refreshTokenHandler()))
+	http.HandleFunc("/users/register", s.addCORSHeader(s.registerHandler()))
 	http.HandleFunc("/test", s.loggedInOnly(s.test()))
 }

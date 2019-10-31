@@ -48,7 +48,7 @@
                             <v-row dense>
                                 <v-col>
                                     <v-btn
-                                        outlined
+                                        text
                                         @click="handleRegister"
                                     >Registrieren</v-btn>
                                 </v-col>
@@ -78,7 +78,6 @@
                 username: '',
                 password: '',
                 showPassword: false,
-                submitted: false,
                 formIsValid: false
             }
         },

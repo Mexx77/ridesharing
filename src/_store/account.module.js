@@ -43,15 +43,16 @@ const actions = {
             .then(
                 user => {
                     commit('registerSuccess', user);
-                    //router.push('/login');
-                    setTimeout(() => {
-                        // display success message after route change completes
-                        dispatch('alert/success', 'Registration successful', { root: true });
-                    })
+                    dispatch('alert/success',
+                        {message: 'Registrierung erfolgreich! Bitte melde dich an.', visible: true},
+                        { root: true }
+                    );
+                    dispatch('user/showRegisterForm', false, { root: true });
+                    dispatch('user/showLoginForm', true, { root: true });
                 },
                 error => {
                     commit('registerFailure', error);
-                    dispatch('alert/error', error, { root: true });
+                    dispatch('alert/error', {message: error, visible: true}, { root: true });
                 }
             );
     }
