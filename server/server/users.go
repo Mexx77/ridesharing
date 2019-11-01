@@ -19,13 +19,13 @@ import (
 const tokenExpiryTimeMinutes = 60 * 24
 
 type user struct {
-	FirstName string    `json:"firstName,omitempty"`
-	LastName  string    `json:"lastName,omitempty"`
-	Phone     string    `json:"phone,omitempty"`
-	Username  string    `json:"username"`
+	FirstName string    `json:"firstName,omitempty" bson:"firstName"`
+	LastName  string    `json:"lastName,omitempty" bson:"lastName"`
+	Username  string    `json:"username" bson:",omitempty"`
 	Password  string    `json:"password,omitempty"`
-	Token     string    `json:"token"`
-	Expires   time.Time `json:"expires"`
+	Phone     string    `json:"phone,omitempty"`
+	Token     string    `json:"token" bson:",omitempty"`
+	Expires   time.Time `json:"expires" bson:",omitempty"`
 	IsAdmin   bool      `json:"isAdmin" bson:"isAdmin"`
 }
 
@@ -68,9 +68,23 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 		}
 
 		filter := bson.D{
-			{"username",  payload.Username},
-			{"password",  payload.Password},
+			{"$and", bson.A{
+				bson.D{
+					{"password", payload.Password},
+				},
+				bson.D{
+					{"$or", bson.A{
+						bson.D{
+							{"username", payload.Username},
+						},
+						bson.D{
+							{"phone", payload.Username},
+						},
+					}},
+				},
+			}},
 		}
+
 		res := s.users.FindOne(context.TODO(), filter, options.FindOne())
 		var user user
 		err = res.Decode(&user)
@@ -92,17 +106,16 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 			},
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		payload.Token, err = token.SignedString(s.config.JwtSecret)
+		user.Token, err = token.SignedString(s.config.JwtSecret)
 		if err != nil {
 			logging.Error.Printf("unable to create tokenString from token %v", token)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		payload.Expires = expirationTime
-		payload.Password = "" // Don't need to send it back
-		payload.IsAdmin = user.IsAdmin
+		user.Expires = expirationTime
+		user.Password = "" // Don't need to send it back
 
-		userJson, _ := json.Marshal(payload)
+		userJson, _ := json.Marshal(user)
 		fmt.Fprint(w, string(userJson))
 	}
 }
@@ -197,17 +210,17 @@ func (s *server) registerHandler() http.HandlerFunc {
 			http.Error(w, errorMsg, http.StatusBadRequest)
 			return
 		}
-		logging.Debug.Println("We got this new user to register:")
-		logging.Debug.Println(body)
+		logging.Info.Println("Going to register new user:")
+		logging.Info.Println(body)
 
-		if payload.FirstName == "" {
-			rsp := Response{ Message: "Vorname wird benötigt" }
+		if len(payload.FirstName) < 2 {
+			rsp := Response{ Message: "Vorname muss mind. 2 Zeichen lang sein" }
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
 		}
-		if payload.LastName == "" {
-			rsp := Response{ Message: "Nachname wird benötigt" }
+		if len(payload.LastName) < 2 {
+			rsp := Response{ Message: "Nachname muss mind. 2 Zeichen lang sein" }
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
@@ -229,7 +242,7 @@ func (s *server) registerHandler() http.HandlerFunc {
 				http.Error(w, string(rspJson), http.StatusBadRequest)
 				return
 			} else if err != mongo.ErrNoDocuments {
-				logging.Error.Printf("Fehler beim Überprüfen eines neuen Benutzernamens: %s\n", err.Error())
+				logging.Error.Printf("Fehler beim Überprüfen eines neuen Benutzernamens (%s): %s\n", payload.Username, err.Error())
 				rsp := Response{ Message: "Sorry, Fehler beim Prüfen des Benutzernamens" }
 				rspJson, _ := json.Marshal(rsp)
 				http.Error(w, string(rspJson), http.StatusBadRequest)
@@ -237,14 +250,20 @@ func (s *server) registerHandler() http.HandlerFunc {
 			}
 		}
 
-		//TODO: match without regexp
-		if !passwordMatched {
-			logging.Debug.Println("password not matched " + payload.Password)
-			rsp := Response{ Message: "Passwort muss 1 Kleinbuchstabe, 1 Großbuchstabe, 1 Zahl enthalten und mind. 8 Zeichen lang sein" }
+		if len(payload.Password) < 8 {
+			rsp := Response{ Message: "Passwort muss mind. 8 Zeichen lang sein" }
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
 		}
+		err = validPassword(payload.Password)
+		if err != nil {
+			rsp := Response{ Message: err.Error() }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusBadRequest)
+			return
+		}
+
 		phoneMatched, _ := regexp.Match(`^01[567][0-9]{8,11}$`, []byte(payload.Phone))
 		if !phoneMatched {
 			rsp := Response{ Message: "Handy-Nr. muss im Format 01 {5,6,7} 12345678 [901] sein" }
@@ -253,12 +272,16 @@ func (s *server) registerHandler() http.HandlerFunc {
 			return
 		}
 
+		_, err = s.users.InsertOne(context.TODO(), payload)
+		if err != nil {
+			logging.Error.Printf("Unable writing user %v to mongo: %v", payload, err)
+			rsp := Response{ Message: "Sorry, konnte dich nicht registieren" }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusBadRequest)
+			return
+		}
 
 		w.WriteHeader(http.StatusNoContent)
-		//rsp := Response{ Message: "Password zu kurz" }
-		//rspJson, _ := json.Marshal(rsp)
-		//http.Error(w, string(rspJson), http.StatusBadRequest)
-		//return
 	}
 }
 

@@ -7,7 +7,7 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <div v-if="$store.state.account.status.loggedIn">
-        Hi, {{$store.state.account.user.username}}!
+        Hi, {{$store.state.account.user.firstName}}!
         <v-btn
                 icon
                 text

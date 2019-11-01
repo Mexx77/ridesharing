@@ -24,8 +24,8 @@
                                     <v-text-field
                                         v-model="username"
                                         prepend-icon="mdi-account"
-                                        label="Benutzername*"
-                                        :rules="[v => !!v || 'Benutzername benötigt']"
+                                        label="Handy-Nr. oder Benutzername*"
+                                        :rules="[v => !!v || 'benötigt']"
                                         required
                                     ></v-text-field>
                                 </v-col>
@@ -34,7 +34,7 @@
                                         v-model="password"
                                         prepend-icon="mdi-lock-question"
                                         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                                        :rules="[v => !!v || 'Passwort benötigt']"
+                                        :rules="[v => !!v || 'benötigt']"
                                         :type="showPassword ? 'text' : 'password'"
                                         label="Passwort*"
                                         @click:append="showPassword = !showPassword"

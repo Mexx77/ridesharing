@@ -12,10 +12,11 @@ const actions = {
         userService.login(username, password)
             .then(
                 user => {
+                    const name = user.username === "" ? user.firstName : user.username;
                     commit('loginSuccess', user);
                     dispatch('user/showLoginForm', false, {root: true})
                     dispatch('alert/success', {
-                        message: `Erfolgreich als ${username} angemeldet`,
+                        message: `Erfolgreich als ${name} angemeldet! :)`,
                         visible: true
                     }, {root: true});
                 },
@@ -38,13 +39,14 @@ const actions = {
     },
     register({ dispatch, commit }, user) {
         commit('registerRequest', user);
+        const firstName = user.firstName;
 
         userService.register(user)
             .then(
-                user => {
-                    commit('registerSuccess', user);
+              () => {
+                    commit('registerSuccess');
                     dispatch('alert/success',
-                        {message: 'Registrierung erfolgreich! Bitte melde dich an.', visible: true},
+                        { message: `Registrierung erfolgreich! Bitte melde dich an, ${firstName} :)`, visible: true },
                         { root: true }
                     );
                     dispatch('user/showRegisterForm', false, { root: true });

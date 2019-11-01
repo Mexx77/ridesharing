@@ -31,3 +31,7 @@ docker run \
  --rm \
  ridesharing
 ```
+
+## TODO
+- hash + salt passwords
+- make sure phone number is unique
