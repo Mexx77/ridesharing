@@ -271,6 +271,21 @@ func (s *server) registerHandler() http.HandlerFunc {
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
 		}
+		filter := bson.D{{"phone",  payload.Phone}}
+		var user user
+		err = s.users.FindOne(context.TODO(), filter, options.FindOne()).Decode(&user)
+		if err == nil {
+			rsp := Response{ Message: fmt.Sprintf("Die Handy-Nr. %s wird bereits von %s verwendet", payload.Phone, user.Username) }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusBadRequest)
+			return
+		} else if err != mongo.ErrNoDocuments {
+			logging.Error.Printf("Fehler beim Überprüfen der Handy-Nr. (%s): %s\n", payload.Phone, err.Error())
+			rsp := Response{ Message: "Sorry, Fehler beim Überprüfen der Handy-Nr." }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusBadRequest)
+			return
+		}
 
 		_, err = s.users.InsertOne(context.TODO(), payload)
 		if err != nil {

@@ -34,4 +34,12 @@ docker run \
 
 ## TODO
 - hash + salt passwords
-- make sure phone number is unique
+
+## Mongo
+```
+{                                                                         
+  "username": 1
+}
+{ unique: true, partialFilterExpression: { username: { $exists: true } } }
+
+```

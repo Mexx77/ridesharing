@@ -43,7 +43,7 @@
                                         v-model="user.username"
                                         prepend-icon="mdi-account"
                                         label="Benutzername"
-                                        hint="Kann beim Login statt der Handy-Nr verwendet werden"
+                                        hint="Kann beim Login statt der Handy-Nr. verwendet werden"
                                         persistent-hint
                                         :rules="[rules.min3orEmpty]"
                                     ></v-text-field>
