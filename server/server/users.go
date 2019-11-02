@@ -68,33 +68,36 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 		}
 
 		filter := bson.D{
-			{"$and", bson.A{
+			{"$or", bson.A{
 				bson.D{
-					{"password", payload.Password},
+					{"username", payload.Username},
 				},
 				bson.D{
-					{"$or", bson.A{
-						bson.D{
-							{"username", payload.Username},
-						},
-						bson.D{
-							{"phone", payload.Username},
-						},
-					}},
+					{"phone", payload.Username},
 				},
 			}},
 		}
-
 		res := s.users.FindOne(context.TODO(), filter, options.FindOne())
 		var user user
 		err = res.Decode(&user)
 		if err == mongo.ErrNoDocuments {
-			logging.Warning.Printf("Authentication failed for %s\n", body)
-			w.WriteHeader(http.StatusUnauthorized)
+			logging.Warning.Printf("Username/phone not found. Auth failed. %s\n", body)
+			rsp := Response{ Message: "Kein Benutzer mit diesem/r Benutzername/Handy-Nr. gefunden" }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusUnauthorized)
 			return
 		} else if err != nil {
-			logging.Error.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
+			logging.Error.Printf("Failed to lookup user at mongo %s\n", body)
+			rsp := Response{ Message: "Sorry, konnte deine Daten nicht überprüfen" }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusInternalServerError)
+			return
+		}
+		if !checkPasswordHash(payload.Password,user.Password){
+			logging.Warning.Printf("Password incorrect. Auth failed. %s\n", body)
+			rsp := Response{ Message: "Benutzername/Handy-Nr. und Passwort stimmen nicht überein" }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusUnauthorized)
 			return
 		}
 
@@ -263,6 +266,14 @@ func (s *server) registerHandler() http.HandlerFunc {
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
 		}
+		payload.Password, err = hashPassword(payload.Password)
+		if err != nil {
+			logging.Error.Printf("Hashing password failed: %s\n", err.Error())
+			rsp := Response{ Message: "Sorry, Fehler beim sicheren Speichern deines Passworts" }
+			rspJson, _ := json.Marshal(rsp)
+			http.Error(w, string(rspJson), http.StatusInternalServerError)
+			return
+		}
 
 		phoneMatched, _ := regexp.Match(`^01[567][0-9]{8,11}$`, []byte(payload.Phone))
 		if !phoneMatched {
@@ -283,7 +294,7 @@ func (s *server) registerHandler() http.HandlerFunc {
 			logging.Error.Printf("Fehler beim Überprüfen der Handy-Nr. (%s): %s\n", payload.Phone, err.Error())
 			rsp := Response{ Message: "Sorry, Fehler beim Überprüfen der Handy-Nr." }
 			rspJson, _ := json.Marshal(rsp)
-			http.Error(w, string(rspJson), http.StatusBadRequest)
+			http.Error(w, string(rspJson), http.StatusInternalServerError)
 			return
 		}
 
@@ -292,7 +303,7 @@ func (s *server) registerHandler() http.HandlerFunc {
 			logging.Error.Printf("Unable writing user %v to mongo: %v", payload, err)
 			rsp := Response{ Message: "Sorry, konnte dich nicht registieren" }
 			rspJson, _ := json.Marshal(rsp)
-			http.Error(w, string(rspJson), http.StatusBadRequest)
+			http.Error(w, string(rspJson), http.StatusInternalServerError)
 			return
 		}
 

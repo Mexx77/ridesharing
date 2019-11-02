@@ -33,7 +33,6 @@ docker run \
 ```
 
 ## TODO
-- hash + salt passwords
 
 ## Mongo
 ```

@@ -12,11 +12,10 @@ const actions = {
         userService.login(username, password)
             .then(
                 user => {
-                    const name = user.username === "" ? user.firstName : user.username;
                     commit('loginSuccess', user);
                     dispatch('user/showLoginForm', false, {root: true})
                     dispatch('alert/success', {
-                        message: `Erfolgreich als ${name} angemeldet! :)`,
+                        message: `Erfolgreich angemeldet. Schön dich wiederzusehen, ${user.firstName}! :)`,
                         visible: true
                     }, {root: true});
                 },
