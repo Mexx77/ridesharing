@@ -151,10 +151,8 @@
                     this.time = time
                     this.$store.commit('ride/showAddUpdateRideForm', true)
                 } else {
-                    this.$store.commit('alert/error', {message: '💡 Bitte melde dich an, um Fahrten hinzuzufügen', visible: true})
+                    this.$store.dispatch('alert/error', {message: '💡 Bitte melde dich an, um Fahrten hinzuzufügen', visible: true})
                 }
-
-
             },
             viewDay({date}) {
                 this.focus = date

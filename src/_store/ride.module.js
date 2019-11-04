@@ -1,21 +1,27 @@
 import {rideService} from "../_services/ride.service";
 import {carProperties} from "../_services/constants";
 
+const getDefaultRideState = () => {
+    return {
+        driver: '',
+        destination: '',
+        startTime: '12:00',
+        endTime: '',
+        bigCarNeeded: false,
+        isUpdate: false,
+        carName: '',
+        id: '',
+    }
+}
+
 const state = {
-    driver: '',
-    destination: '',
-    startTime: '12:00',
-    endTime: '',
-    bigCarNeeded: false,
     showAddEventForm: false,
     focus: '',
     selectedOpen: false,
     selectedEvent: {},
     selectedElement: null,
     rides: [],
-    isUpdate: false,
-    carName: '',
-    id: '',
+    ride: getDefaultRideState()
 };
 
 const actions = {
@@ -27,49 +33,49 @@ const actions = {
     },
     updateRide({commit, dispatch}) {
         const ride = {
-            id: state.id,
-            driver: state.driver,
-            destination: state.destination,
-            start: `${state.focus}T${state.startTime}:00`,
-            end: `${state.focus}T${state.endTime}:00`,
-            startTime: state.startTime,
-            endTime: state.endTime,
-            bigCarNeeded: state.bigCarNeeded,
+            id: state.ride.id,
+            driver: state.ride.driver,
+            destination: state.ride.destination,
+            start: `${state.focus}T${state.ride.startTime}:00`,
+            end: `${state.focus}T${state.ride.endTime}:00`,
+            startTime: state.ride.startTime,
+            endTime: state.ride.endTime,
+            bigCarNeeded: state.ride.bigCarNeeded,
         }
-        if(state.carName !== "" && state.carName !== undefined){
-            ride.carName = state.carName
+        if (state.ride.carName !== "" && state.ride.carName !== undefined) {
+            ride.carName = state.ride.carName
             ride.carColor = carProperties[ride.carName].color
         }
         rideService.update(ride).then(
-          data => {
-              const newRides = state.rides.filter(r => r.id !== state.id).concat([data])
-              commit('setRides', newRides)
-              commit('showAddUpdateRideForm', false)
-              dispatch('alert/success', {
-                  message: 'Fahrt erfolgreich aktualisiert',
-                  visible: true
-              }, {root: true});
-          },
-          () => {
-              dispatch('alert/error', {
-                  message: 'Ups, da ist was fehlgeschlagen - sorry',
-                  visible: true
-              }, {root: true});
-          }
+            data => {
+                const newRides = state.rides.filter(r => r.id !== state.ride.id).concat([data])
+                commit('setRides', newRides)
+                commit('showAddUpdateRideForm', false)
+                dispatch('alert/success', {
+                    message: 'Fahrt erfolgreich aktualisiert',
+                    visible: true
+                }, {root: true});
+            },
+            () => {
+                dispatch('alert/error', {
+                    message: 'Ups, da ist was fehlgeschlagen - sorry',
+                    visible: true
+                }, {root: true});
+            }
         )
     },
     addRide({commit, dispatch, rootState}) {
         const ride = {
-            driver: state.driver,
-            destination: state.destination,
-            start: `${state.focus}T${state.startTime}:00`,
-            end: `${state.focus}T${state.endTime}:00`,
-            startTime: state.startTime,
-            endTime: state.endTime,
-            bigCarNeeded: state.bigCarNeeded,
+            driver: state.ride.driver,
+            destination: state.ride.destination,
+            start: `${state.focus}T${state.ride.startTime}:00`,
+            end: `${state.focus}T${state.ride.endTime}:00`,
+            startTime: state.ride.startTime,
+            endTime: state.ride.endTime,
+            bigCarNeeded: state.ride.bigCarNeeded,
         }
-        if(state.carName !== "" && state.carName !== undefined){
-            ride.carName = state.carName
+        if (state.ride.carName !== "" && state.ride.carName !== undefined) {
+            ride.carName = state.ride.carName
             ride.carColor = carProperties[ride.carName].color
         }
         rideService.add(ride).then(
@@ -98,34 +104,32 @@ const actions = {
 
 
 const mutations = {
-    setDriver: (state, v) => state.driver = v,
-    setDestination: (state, v) => state.destination = v,
-    setBigCarNeeded: (state, v) => state.bigCarNeeded = v,
-    setStartTime: (state, v) => state.startTime = v,
-    setEndTime: (state, v) => state.endTime = v,
-    setCarName: (state, v) => state.carName = v,
+    setDriver: (state, v) => state.ride.driver = v,
+    setDestination: (state, v) => state.ride.destination = v,
+    setBigCarNeeded: (state, v) => state.ride.bigCarNeeded = v,
+    setStartTime: (state, v) => state.ride.startTime = v,
+    setEndTime: (state, v) => state.ride.endTime = v,
+    setCarName: (state, v) => state.ride.carName = v,
     showAddUpdateRideForm: (state, v) => {
         if (v) {
+            // show form
             if (Object.keys(state.selectedEvent).length !== 0) {
-                state.isUpdate = true
-                state.driver = state.selectedEvent.driver
-                state.destination = state.selectedEvent.destination
-                state.startTime = state.selectedEvent.startTime
-                state.endTime = state.selectedEvent.endTime
-                state.bigCarNeeded = state.selectedEvent.bigCarNeeded
-                state.carName = state.selectedEvent.carName
-                state.id = state.selectedEvent.id
+                // update ride
+                state.ride.isUpdate = true
+                state.ride.driver = state.selectedEvent.driver
+                state.ride.destination = state.selectedEvent.destination
+                state.ride.startTime = state.selectedEvent.startTime
+                state.ride.endTime = state.selectedEvent.endTime
+                state.ride.bigCarNeeded = state.selectedEvent.bigCarNeeded
+                state.ride.carName = state.selectedEvent.carName
+                state.ride.id = state.selectedEvent.id
+            } else {
+                // new ride
+                // state.ride = getDefaultRideState()
             }
         } else {
-            state.isUpdate = false
-            state.driver = ""
-            state.destination = ""
-            state.startTime = ""
-            state.endTime = ""
-            state.bigCarNeeded = false
-            state.carName = ""
-            state.carColor = ""
-            state.id = ""
+            // hide form
+            state.ride = getDefaultRideState()
         }
         state.showAddEventForm = v
     },
@@ -142,6 +146,7 @@ const mutations = {
     deleteSuccess(state, id) {
         state.selectedOpen = false
         state.rides = state.rides.filter(ride => ride.id !== id)
+        state.ride = getDefaultRideState()
     },
 };
 

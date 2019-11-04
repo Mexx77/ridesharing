@@ -133,7 +133,7 @@
             },
             startTime: {
                 get () {
-                    return this.$store.state.ride.startTime
+                    return this.$store.state.ride.ride.startTime
                 },
                 set (value) {
                     this.$store.commit('ride/setStartTime', value)
@@ -141,7 +141,7 @@
             },
             endTime: {
                 get () {
-                    return this.$store.state.ride.endTime
+                    return this.$store.state.ride.ride.endTime
                 },
                 set (value) {
                     this.$store.commit('ride/setEndTime', value)
@@ -157,7 +157,7 @@
             },
             driver: {
                 get () {
-                    return this.$store.state.ride.driver
+                    return this.$store.state.ride.ride.driver
                 },
                 set (value) {
                     this.$store.commit('ride/setDriver', value)
@@ -165,7 +165,7 @@
             },
             destination: {
                 get () {
-                    return this.$store.state.ride.destination
+                    return this.$store.state.ride.ride.destination
                 },
                 set (value) {
                     this.$store.commit('ride/setDestination', value)
@@ -173,7 +173,7 @@
             },
             bigCarNeeded: {
                 get () {
-                    return this.$store.state.ride.bigCarNeeded
+                    return this.$store.state.ride.ride.bigCarNeeded
                 },
                 set (value) {
                     this.$store.commit('ride/setBigCarNeeded', value)
@@ -186,7 +186,7 @@
             },
             isUpdate: {
                 get () {
-                    return this.$store.state.ride.isUpdate
+                    return this.$store.state.ride.ride.isUpdate
                 }
             },
             isAdmin: function () {
@@ -194,7 +194,7 @@
             },
             carName: {
                 get () {
-                    return this.$store.state.ride.carName
+                    return this.$store.state.ride.ride.carName
                 },
                 set (value) {
                     this.$store.commit('ride/setCarName', value)
