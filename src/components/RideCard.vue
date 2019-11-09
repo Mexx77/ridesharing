@@ -4,6 +4,7 @@
         :close-on-content-click="false"
         :activator="this.$store.state.ride.selectedElement"
         offset-x
+        max-width="400"
     >
         <v-card
             color="grey lighten-4"
@@ -14,14 +15,17 @@
                 :color="selectedEvent.getEventColor"
                 :style="{color: selectedEvent.getEventTextColor}"
             >
-                <v-btn v-if="isAdmin" icon small @click="editRide">
-                    <v-icon>mdi-pencil</v-icon>
-                </v-btn>
                 <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-btn v-if="isAdmin" icon small @click="deleteRide">
-                    <v-icon>mdi-delete</v-icon>
-                </v-btn>
+                <v-spacer/>
+                <v-toolbar-items>
+                    <v-btn v-if="isAdmin" icon small @click="editRide">
+                        <v-icon>mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-btn v-if="isAdmin" icon small @click="deleteRide">
+                        <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                </v-toolbar-items>
+
             </v-toolbar>
             <v-card-text>
                 <span v-html="selectedEvent.details"></span>
@@ -72,7 +76,7 @@
                 this.delete(this.selectedEvent.id)
             },
             editRide() {
-                this.$store.commit('ride/showAddUpdateRideForm', true)
+                this.$store.dispatch('ride/showAddUpdateRideForm', {visible: true, isUpdate: true})
             },
             getEventColor: helper.getEventColor,
             getEventTextColor: helper.getEventTextColor

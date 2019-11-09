@@ -14,7 +14,7 @@
                     <v-toolbar color="primary" dark>
                         <v-toolbar-title>
                             <v-icon class="pb-1">mdi-car</v-icon>
-                            <span v-if="isUpdate"> Fahrt {{selectedEvent.name}}</span>
+                            <span v-if="isUpdate"> Fahrt {{driver}} ↦ {{destination}}</span>
                             <span v-else> Reservierung am {{germanDate}}</span>
                         </v-toolbar-title>
                     </v-toolbar>
@@ -52,6 +52,7 @@
                                         step="600"
                                         suffix="Uhr"
                                         format="24hr"
+                                        :rules="[v => !!v || 'Startzeit benötigt']"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col :cols="$vuetify.breakpoint.mdAndUp ? 6 : 12">
@@ -64,6 +65,7 @@
                                         step="600"
                                         suffix="Uhr"
                                         format="24hr"
+                                        :rules="[v => !!v || 'Zeit der Rückgabe benötigt']"
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
@@ -89,7 +91,7 @@
                                         v-model="bigCarNeeded"
                                         label="Ich brauche ein großes Auto"
                                     ></v-switch>
-                                    <v-btn @click="showAddEventForm = false">Abbrechen</v-btn>
+                                    <v-btn @click="closeForm">Abbrechen</v-btn>
                                     <v-btn @click="validateAndSubmitForm">{{saveButtonText}}</v-btn>
                                 </v-col>
                             </v-row>
@@ -152,7 +154,7 @@
                     return this.$store.state.ride.showAddEventForm
                 },
                 set (value) {
-                    this.$store.commit('ride/showAddUpdateRideForm', value)
+                    this.$store.commit('ride/showAddEventForm', value)
                 }
             },
             driver: {
@@ -177,11 +179,6 @@
                 },
                 set (value) {
                     this.$store.commit('ride/setBigCarNeeded', value)
-                }
-            },
-            selectedEvent: {
-                get () {
-                    return this.$store.state.ride.selectedEvent
                 }
             },
             isUpdate: {
@@ -211,6 +208,10 @@
                         this.addRide()
                     }
                 }
+            },
+            closeForm() {
+              this.$refs.form.reset()
+              this.showAddEventForm = false
             },
             allowedMinutes: m => m % 15 == 0,
         }

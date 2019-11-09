@@ -1,11 +1,12 @@
 import {rideService} from "../_services/ride.service";
 import {carProperties} from "../_services/constants";
 
+const defaultStartTime = '12:00'
 const getDefaultRideState = () => {
     return {
         driver: '',
         destination: '',
-        startTime: '12:00',
+        startTime: defaultStartTime,
         endTime: '',
         bigCarNeeded: false,
         isUpdate: false,
@@ -50,7 +51,7 @@ const actions = {
             data => {
                 const newRides = state.rides.filter(r => r.id !== state.ride.id).concat([data])
                 commit('setRides', newRides)
-                commit('showAddUpdateRideForm', false)
+                commit('showAddEventForm', false)
                 dispatch('alert/success', {
                     message: 'Fahrt erfolgreich aktualisiert',
                     visible: true
@@ -84,7 +85,7 @@ const actions = {
                 if (rootState.account.status.loggedIn && rootState.account.user.isAdmin) {
                     msg = 'Fahrt gespeichert'
                 }
-                commit('showAddUpdateRideForm', false)
+                commit('showAddEventForm', false)
                 const newRides = state.rides.concat([data])
                 commit('setRides', newRides)
                 dispatch('alert/success', {
@@ -99,40 +100,42 @@ const actions = {
                 }, {root: true});
             }
         )
+    },
+    showAddUpdateRideForm: ({commit, rootState}, {visible, isUpdate, startTime}) => {
+        if (visible) {
+            if (isUpdate) {
+                commit('setRide', {
+                    driver: state.selectedEvent.driver,
+                    destination: state.selectedEvent.destination,
+                    startTime: state.selectedEvent.startTime,
+                    endTime: state.selectedEvent.endTime,
+                    bigCarNeeded: state.selectedEvent.bigCarNeeded,
+                    isUpdate: true,
+                    carName: state.selectedEvent.carName,
+                    id: state.selectedEvent.id,
+                })
+            } else {
+                let ride = getDefaultRideState()
+                ride.startTime = startTime === '' ? defaultStartTime : startTime
+                if (rootState.account.status.loggedIn) {
+                    ride.driver = rootState.account.user.firstName + ' ' + rootState.account.user.lastName
+                }
+                commit('setRide', ride)
+            }
+        }
+        commit('showAddEventForm', visible)
     }
 }
 
 
 const mutations = {
+    showAddEventForm: (state, v) => state.showAddEventForm = v,
     setDriver: (state, v) => state.ride.driver = v,
     setDestination: (state, v) => state.ride.destination = v,
     setBigCarNeeded: (state, v) => state.ride.bigCarNeeded = v,
     setStartTime: (state, v) => state.ride.startTime = v,
     setEndTime: (state, v) => state.ride.endTime = v,
     setCarName: (state, v) => state.ride.carName = v,
-    showAddUpdateRideForm: (state, v) => {
-        if (v) {
-            // show form
-            if (Object.keys(state.selectedEvent).length !== 0) {
-                // update ride
-                state.ride.isUpdate = true
-                state.ride.driver = state.selectedEvent.driver
-                state.ride.destination = state.selectedEvent.destination
-                state.ride.startTime = state.selectedEvent.startTime
-                state.ride.endTime = state.selectedEvent.endTime
-                state.ride.bigCarNeeded = state.selectedEvent.bigCarNeeded
-                state.ride.carName = state.selectedEvent.carName
-                state.ride.id = state.selectedEvent.id
-            } else {
-                // new ride
-                // state.ride = getDefaultRideState()
-            }
-        } else {
-            // hide form
-            state.ride = getDefaultRideState()
-        }
-        state.showAddEventForm = v
-    },
     setFocus: (state, v) => state.focus = v,
     setSelectedOpen: (state, v) => {
         if (!v) {
@@ -143,6 +146,7 @@ const mutations = {
     setSelectedEvent: (state, v) => state.selectedEvent = v,
     setSelectedElement: (state, v) => state.selectedElement = v,
     setRides: (state, v) => state.rides = v,
+    setRide: (state, ride) => state.ride = ride,
     deleteSuccess(state, id) {
         state.selectedOpen = false
         state.rides = state.rides.filter(ride => ride.id !== id)

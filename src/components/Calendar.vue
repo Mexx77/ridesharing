@@ -147,9 +147,12 @@
             addEvent(time) {
                 if (this.$store.state.account.status.loggedIn) {
                     this.focus = time.date
-                    this.$store.commit('ride/setStartTime', this.roundMinutesAndPadZeros(time.hour, time.minute))
                     this.time = time
-                    this.$store.commit('ride/showAddUpdateRideForm', true)
+                    this.$store.dispatch('ride/showAddUpdateRideForm', {
+                        visible: true,
+                        isUpdate: false,
+                        startTime: this.roundMinutesAndPadZeros(time.hour, time.minute)
+                    })
                 } else {
                     this.$store.dispatch('alert/error', {message: '💡 Bitte melde dich an, um Fahrten hinzuzufügen', visible: true})
                 }
