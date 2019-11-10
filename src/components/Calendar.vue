@@ -146,12 +146,13 @@
             },
             addEvent(time) {
                 if (this.$store.state.account.status.loggedIn) {
-                    this.focus = time.date
+                    //this.focus = time.date
                     this.time = time
                     this.$store.dispatch('ride/showAddUpdateRideForm', {
                         visible: true,
                         isUpdate: false,
-                        startTime: this.roundMinutesAndPadZeros(time.hour, time.minute)
+                        startTime: this.roundMinutesAndPadZeros(time.hour, time.minute),
+                        date: time.date
                     })
                 } else {
                     this.$store.dispatch('alert/error', {message: '💡 Bitte melde dich an, um Fahrten hinzuzufügen', visible: true})

@@ -23,6 +23,7 @@ type ride struct {
 	StartTime    string `json:"startTime" bson:"startTime,omitempty"`
 	EndTime      string `json:"endTime" bson:"endTime,omitempty"`
 	BigCarNeeded bool   `json:"bigCarNeeded" bson:"bigCarNeeded"`
+	Date		 string `json:"date" bson:",omitempty"`
 	Name         string `json:"name" bson:"-"`
 	Details      string `json:"details" bson:"-"`
 }
@@ -199,23 +200,26 @@ func treatRide(ride ride) ride {
 	ride.Name = ride.Driver + " ↦ " + ride.Destination
 	if ride.CarName != "" {
 		ride.Details = fmt.Sprintf(
-			"%s fährt mit dem %s um %s nach %s",
+			"Fahrer: %s</br>Ziel: %s</br>Auto: %s</br>Startzeit: %s</br>Rückkehr: %s",
 			ride.Driver,
+			ride.Destination,
 			ride.CarName,
 			ride.StartTime,
-			ride.Destination,
+			ride.EndTime,
 		)
 	} else {
-		bigCarTxt := ""
+		bigCarTxt := "normale Größe"
 		if ride.BigCarNeeded {
-			bigCarTxt = "mit einem großen Auto "
+			bigCarTxt = "groß"
 		}
 		ride.Details = fmt.Sprintf(
-			"%s möchte %sum %s nach %s fahren",
+			"<b>Achtung: Unbestätigte Fahrt</b></br>Fahrer: %s</br>Ziel: %s</br>Auto: %s</br>Startzeit: %s</br>Rückkehr: %s",
 			ride.Driver,
+			ride.Destination,
 			bigCarTxt,
 			ride.StartTime,
-			ride.Destination,
+			ride.EndTime,
+
 		)
 	}
 	return ride

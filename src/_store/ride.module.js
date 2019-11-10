@@ -12,6 +12,7 @@ const getDefaultRideState = () => {
         isUpdate: false,
         carName: '',
         id: '',
+        date: ''
     }
 }
 
@@ -37,11 +38,12 @@ const actions = {
             id: state.ride.id,
             driver: state.ride.driver,
             destination: state.ride.destination,
-            start: `${state.focus}T${state.ride.startTime}:00`,
-            end: `${state.focus}T${state.ride.endTime}:00`,
+            start: `${state.ride.date}T${state.ride.startTime}:00`,
+            end: `${state.ride.date}T${state.ride.endTime}:00`,
             startTime: state.ride.startTime,
             endTime: state.ride.endTime,
             bigCarNeeded: state.ride.bigCarNeeded,
+            date: state.ride.date
         }
         if (state.ride.carName !== "" && state.ride.carName !== undefined) {
             ride.carName = state.ride.carName
@@ -69,11 +71,12 @@ const actions = {
         const ride = {
             driver: state.ride.driver,
             destination: state.ride.destination,
-            start: `${state.focus}T${state.ride.startTime}:00`,
-            end: `${state.focus}T${state.ride.endTime}:00`,
+            start: `${state.ride.date}T${state.ride.startTime}:00`,
+            end: `${state.ride.date}T${state.ride.endTime}:00`,
             startTime: state.ride.startTime,
             endTime: state.ride.endTime,
             bigCarNeeded: state.ride.bigCarNeeded,
+            date: state.ride.date
         }
         if (state.ride.carName !== "" && state.ride.carName !== undefined) {
             ride.carName = state.ride.carName
@@ -101,7 +104,7 @@ const actions = {
             }
         )
     },
-    showAddUpdateRideForm: ({commit, rootState}, {visible, isUpdate, startTime}) => {
+    showAddUpdateRideForm: ({commit, rootState}, {visible, isUpdate, startTime, date}) => {
         if (visible) {
             if (isUpdate) {
                 commit('setRide', {
@@ -113,9 +116,11 @@ const actions = {
                     isUpdate: true,
                     carName: state.selectedEvent.carName,
                     id: state.selectedEvent.id,
+                    date: state.selectedEvent.date
                 })
             } else {
                 let ride = getDefaultRideState()
+                ride.date = date
                 ride.startTime = startTime === '' ? defaultStartTime : startTime
                 if (rootState.account.status.loggedIn) {
                     ride.driver = rootState.account.user.firstName + ' ' + rootState.account.user.lastName

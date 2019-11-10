@@ -125,12 +125,12 @@
                     return 'anfragen'
                 }
             },
-            focus() {
-                return this.$store.state.ride.focus
+            rideDate() {
+                return this.$store.state.ride.ride.date
             },
             germanDate() {
-                if (this.focus == undefined) return undefined
-                const p = this.focus.split(/\D/g)
+                if (this.rideDate == undefined) return undefined
+                const p = this.rideDate.split(/\D/g)
                 return [p[2], p[1], p[0]].join(".")
             },
             startTime: {

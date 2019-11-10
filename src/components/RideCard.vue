@@ -2,9 +2,11 @@
     <v-menu
         v-model="selectedOpen"
         :close-on-content-click="false"
+        :close-on-click="true"
         :activator="this.$store.state.ride.selectedElement"
         offset-x
         max-width="400"
+        @keydown.esc="selectedOpen = false"
     >
         <v-card
             color="grey lighten-4"
@@ -27,7 +29,7 @@
                 </v-toolbar-items>
 
             </v-toolbar>
-            <v-card-text>
+            <v-card-text class="pb-0">
                 <span v-html="selectedEvent.details"></span>
             </v-card-text>
             <v-card-actions>
@@ -36,7 +38,7 @@
                     color="secondary"
                     @click="selectedOpen = false"
                 >
-                    Abbrechen
+                    Schließen
                 </v-btn>
             </v-card-actions>
         </v-card>
