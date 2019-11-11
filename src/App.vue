@@ -1,34 +1,57 @@
 <template>
   <v-app>
     <v-app-bar app>
-      <v-toolbar-title class="headline text-uppercase">
-        <span v-if="$vuetify.breakpoint.mdAndUp">{{brandName}} </span>
+      <v-toolbar-title class="headline text-uppercase mr-4 ml-3" v-if="$vuetify.breakpoint.mdAndUp">
+        <span >{{brandName}} </span>
         <span class="font-weight-light">RIDESHARING</span>
       </v-toolbar-title>
+      <v-btn text x-small @click="focusToday">
+        Heute
+      </v-btn>
+      <v-btn fab text small :width="$vuetify.breakpoint.mdAndUp ? 30 : 20" @click="prev">
+        <v-icon>mdi-chevron-left</v-icon>
+      </v-btn>
+      <v-btn fab text small :width="$vuetify.breakpoint.mdAndUp ? 30 : 20" @click="next">
+        <v-icon>mdi-chevron-right</v-icon>
+      </v-btn>
+      <v-menu bottom right>
+        <template v-slot:activator="{ on }">
+          <v-btn text x-small v-on="on">
+            <span>{{ typeToLabel[type] }}</span>
+            <v-icon right>mdi-menu-down</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="type = 'day'">
+            <v-list-item-title>Tag</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="type = 'week'">
+            <v-list-item-title>Woche</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="type = 'month'">
+            <v-list-item-title>Monat</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="type = '4day'">
+            <v-list-item-title>4 Tage</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       <v-spacer></v-spacer>
       <div v-if="$store.state.account.status.loggedIn">
-        Hi, {{$store.state.account.user.firstName}}!
-        <v-btn
-                icon
-                text
-                @click="logout"
-        >
+        <span style="vertical-align: text-top">Hi, {{$store.state.account.user.firstName}}!</span>
+        <v-btn small text icon @click="logout">
           <v-icon>mdi-logout-variant</v-icon>
         </v-btn>
       </div>
       <div v-else>
-        <v-btn
-            text
-            color="secondary"
-            @click="$store.dispatch('user/showLoginForm', true)"
-        >
+        <v-btn small text color="secondary" @click="$store.dispatch('user/showLoginForm', true)">
           <v-icon>mdi-login-variant</v-icon>&nbsp;Anmelden
         </v-btn>
       </div>
     </v-app-bar>
 
     <v-content>
-      <Calendar/>
+      <Calendar ref="calendar"></Calendar>
       <LoginForm/>
       <RegisterForm/>
       <v-snackbar v-model="snackbar" :timeout="timeout" :color="alert.type">
@@ -66,9 +89,16 @@ export default {
   data() {
     return {
       brandName: constants.brandName,
+      typeToLabel: {
+        month: 'Monat',
+        week: 'Woche',
+        day: 'Tag',
+        '4day': '4 Tage',
+      },
     }
   },
   computed: {
+    ...mapState('calendar', ['today']),
     ...mapState({
       alert: state => state.alert
     }),
@@ -84,10 +114,35 @@ export default {
       get () {
         return this.$store.state.alert.timeout
       }
+    },
+    type: {
+      get () {
+        return this.$store.state.calendar.type
+      },
+      set (value) {
+        this.$store.commit('calendar/setType', value)
+      }
+    },
+    focus: {
+      get () {
+        return this.$store.state.calendar.focus
+      },
+      set (value) {
+        this.$store.commit('calendar/setFocus', value)
+      }
     }
   },
   methods: {
-    ...mapActions('account', ['logout'])
+    ...mapActions('account', ['logout']),
+    prev() {
+      this.$refs.calendar.prev()
+    },
+    next() {
+      this.$refs.calendar.next()
+    },
+    focusToday() {
+      this.focus = this.today
+    },
   },
   mounted: function() {
     if (this.$store.state.account.status.loggedIn) {
@@ -101,6 +156,9 @@ export default {
 };
 </script>
 <style>
+  .v-application--wrap .v-toolbar__content{
+    padding: 0 5px;
+  }
   .theme--light.v-application.v-application--is-ltr {
     background: white;
   }

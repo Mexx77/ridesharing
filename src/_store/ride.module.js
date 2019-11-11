@@ -18,7 +18,6 @@ const getDefaultRideState = () => {
 
 const state = {
     showAddEventForm: false,
-    focus: '',
     selectedOpen: false,
     selectedEvent: {},
     selectedElement: null,
@@ -142,7 +141,6 @@ const mutations = {
     setStartTime: (state, v) => state.ride.startTime = v,
     setEndTime: (state, v) => state.ride.endTime = v,
     setCarName: (state, v) => state.ride.carName = v,
-    setFocus: (state, v) => state.focus = v,
     setSelectedOpen: (state, v) => {
         if (!v) {
             state.selectedEvent = {}
