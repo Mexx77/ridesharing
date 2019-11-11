@@ -42,10 +42,10 @@
         </v-btn>
       </v-snackbar>
     </v-content>
-    <v-footer>
-      <v-spacer></v-spacer>
-      <div>&copy; {{ new Date().getFullYear() }}</div>
-    </v-footer>
+<!--    <v-footer>-->
+<!--      <v-spacer></v-spacer>-->
+<!--      <div>&copy; {{ new Date().getFullYear() }}</div>-->
+<!--    </v-footer>-->
   </v-app>
 </template>
 
@@ -101,6 +101,9 @@ export default {
 };
 </script>
 <style>
+  .theme--light.v-application.v-application--is-ltr {
+    background: white;
+  }
   body {
     overflow: hidden;
     overflow-y: auto;
