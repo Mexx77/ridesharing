@@ -5,16 +5,16 @@
         <span >{{brandName}} </span>
         <span class="font-weight-light">RIDESHARING</span>
       </v-toolbar-title>
-      <v-btn text x-small @click="focusToday">
-        Heute
-      </v-btn>
-      <v-btn fab text small :width="$vuetify.breakpoint.mdAndUp ? 30 : 20" @click="prev">
+      <v-btn fab text small @click="prev">
         <v-icon>mdi-chevron-left</v-icon>
       </v-btn>
-      <v-btn fab text small :width="$vuetify.breakpoint.mdAndUp ? 30 : 20" @click="next">
+      <v-btn text small @click="focusToday">
+        Heute
+      </v-btn>
+      <v-btn fab text small @click="next">
         <v-icon>mdi-chevron-right</v-icon>
       </v-btn>
-      <v-menu bottom right>
+      <v-menu bottom right v-if="$vuetify.breakpoint.mdAndUp">
         <template v-slot:activator="{ on }">
           <v-btn text x-small v-on="on">
             <span>{{ typeToLabel[type] }}</span>
@@ -25,14 +25,14 @@
           <v-list-item @click="type = 'day'">
             <v-list-item-title>Tag</v-list-item-title>
           </v-list-item>
+          <v-list-item @click="type = '4day'">
+            <v-list-item-title>4 Tage</v-list-item-title>
+          </v-list-item>
           <v-list-item @click="type = 'week'">
             <v-list-item-title>Woche</v-list-item-title>
           </v-list-item>
           <v-list-item @click="type = 'month'">
             <v-list-item-title>Monat</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = '4day'">
-            <v-list-item-title>4 Tage</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -65,10 +65,32 @@
         </v-btn>
       </v-snackbar>
     </v-content>
-<!--    <v-footer>-->
-<!--      <v-spacer></v-spacer>-->
-<!--      <div>&copy; {{ new Date().getFullYear() }}</div>-->
-<!--    </v-footer>-->
+    <v-footer>
+      <v-menu bottom right v-if="$vuetify.breakpoint.smAndDown">
+        <template v-slot:activator="{ on }">
+          <v-btn text x-small v-on="on">
+            <span>{{ typeToLabel[type] }}</span>
+            <v-icon right>mdi-menu-down</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="type = 'day'">
+            <v-list-item-title>Tag</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="type = '4day'">
+            <v-list-item-title>4 Tage</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="type = 'week'">
+            <v-list-item-title>Woche</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="type = 'month'">
+            <v-list-item-title>Monat</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-spacer></v-spacer>
+      <div>&copy; {{ new Date().getFullYear() }}</div>
+    </v-footer>
   </v-app>
 </template>
 
