@@ -5,13 +5,13 @@
         <span >{{brandName}} </span>
         <span class="font-weight-light">RIDESHARING</span>
       </v-toolbar-title>
-      <v-btn fab text small @click="prev">
+      <v-btn fab text @click="prev">
         <v-icon>mdi-chevron-left</v-icon>
       </v-btn>
-      <v-btn text small @click="focusToday">
+      <v-btn text width="30" @click="focusToday">
         Heute
       </v-btn>
-      <v-btn fab text small @click="next">
+      <v-btn fab text @click="next">
         <v-icon>mdi-chevron-right</v-icon>
       </v-btn>
       <v-menu bottom right v-if="$vuetify.breakpoint.mdAndUp">
@@ -68,7 +68,7 @@
     <v-footer>
       <v-menu bottom right v-if="$vuetify.breakpoint.smAndDown">
         <template v-slot:activator="{ on }">
-          <v-btn text x-small v-on="on">
+          <v-btn text v-on="on">
             <span>{{ typeToLabel[type] }}</span>
             <v-icon right>mdi-menu-down</v-icon>
           </v-btn>
