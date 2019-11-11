@@ -50,7 +50,7 @@
       </div>
     </v-app-bar>
 
-    <v-content>
+    <v-content v-touch:swipe.left="next" v-touch:swipe.right="prev">
       <Calendar ref="calendar"></Calendar>
       <LoginForm/>
       <RegisterForm/>
