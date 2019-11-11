@@ -19,26 +19,17 @@
             >
                 <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
                 <v-spacer/>
-                <v-toolbar-items>
-                    <v-btn v-if="isAdmin" icon small @click="editRide">
-                        <v-icon>mdi-pencil</v-icon>
-                    </v-btn>
-                    <v-btn v-if="isAdmin" icon small @click="deleteRide">
-                        <v-icon>mdi-delete</v-icon>
-                    </v-btn>
-                </v-toolbar-items>
-
+                <v-btn @click="selectedOpen = false" icon small><v-icon>mdi-close</v-icon></v-btn>
             </v-toolbar>
             <v-card-text class="pb-0">
                 <span v-html="selectedEvent.details"></span>
             </v-card-text>
             <v-card-actions>
-                <v-btn
-                    text
-                    color="secondary"
-                    @click="selectedOpen = false"
-                >
-                    Schließen
+                <v-btn v-if="isAdmin" text color="primary" @click="editRide">
+                    <v-icon>mdi-pencil</v-icon> Ändern
+                </v-btn>
+                <v-btn v-if="isAdmin" text color="red" @click="deleteRide">
+                    <v-icon>mdi-delete</v-icon> Löschen
                 </v-btn>
             </v-card-actions>
         </v-card>
@@ -90,3 +81,8 @@
         }
     }
 </script>
+<style scoped>
+    >>> td:first-child {
+        padding-right: 10px;
+    }
+</style>

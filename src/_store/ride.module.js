@@ -56,13 +56,13 @@ const actions = {
                 commit('showAddEventForm', false)
                 dispatch('alert/success', {
                     message: 'Fahrt erfolgreich aktualisiert',
-                    visible: true
+                    timeout: 6000
                 }, {root: true});
             },
             () => {
                 dispatch('alert/error', {
                     message: 'Ups, da ist was fehlgeschlagen - sorry',
-                    visible: true
+                    timeout: 6000
                 }, {root: true});
             }
         )
@@ -93,13 +93,13 @@ const actions = {
                 commit('setRides', newRides)
                 dispatch('alert/success', {
                     message: msg,
-                    visible: true
+                    timeout: 6000
                 }, {root: true});
             },
             () => {
                 dispatch('alert/error', {
                     message: 'Ups, da ist was fehlgeschlagen - sorry',
-                    visible: true
+                    timeout: 6000
                 }, {root: true});
             }
         )
@@ -123,7 +123,8 @@ const actions = {
                 ride.date = date
                 ride.startTime = startTime === '' ? defaultStartTime : startTime
                 if (rootState.account.status.loggedIn) {
-                    ride.driver = rootState.account.user.firstName + ' ' + rootState.account.user.lastName
+                    ride.driver = rootState.account.user.firstName + ' ';
+                    ride.driver += rootState.account.user.lastName.substr(0,1) + '.'
                 }
                 commit('setRide', ride)
             }

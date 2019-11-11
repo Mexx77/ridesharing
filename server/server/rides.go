@@ -197,12 +197,16 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 }
 
 func treatRide(ride ride) ride {
-	ride.Name = ride.Driver + " ↦ " + ride.Destination
+	ride.Name = fmt.Sprintf("%s (%s)", ride.Destination, ride.Driver)
 	if ride.CarName != "" {
-		ride.Details = fmt.Sprintf(
-			"Fahrer: %s</br>Ziel: %s</br>Auto: %s</br>Startzeit: %s</br>Rückkehr: %s",
-			ride.Driver,
+		ride.Details = fmt.Sprintf(`<table>
+			<tr><td>Ziel</td><td>%s</td></tr>
+			<tr><td>Fahrer</td><td>%s</td></tr>
+			<tr><td>Auto</td><td>%s</td></tr>
+			<tr><td>Startzeit</td><td>%s</td></tr>
+			<tr><td>Rückkehr</td><td>%s</td></tr></table>`,
 			ride.Destination,
+			ride.Driver,
 			ride.CarName,
 			ride.StartTime,
 			ride.EndTime,
@@ -212,10 +216,15 @@ func treatRide(ride ride) ride {
 		if ride.BigCarNeeded {
 			bigCarTxt = "groß"
 		}
-		ride.Details = fmt.Sprintf(
-			"<b>Achtung: Unbestätigte Fahrt</b></br>Fahrer: %s</br>Ziel: %s</br>Auto: %s</br>Startzeit: %s</br>Rückkehr: %s",
-			ride.Driver,
+		ride.Details = fmt.Sprintf(`<table>
+			<tr><td><b>Achtung</b></td><td><b>Unbestätigte Fahrt</b></td></tr>
+			<tr><td>Ziel</td><td>%s</td></tr>
+			<tr><td>Fahrer</td><td>%s</td></tr>
+			<tr><td>Auto</td><td>%s</td></tr>
+			<tr><td>Startzeit</td><td>%s</td></tr>
+			<tr><td>Rückkehr</td><td>%s</td></tr></table>`,
 			ride.Destination,
+			ride.Driver,
 			bigCarTxt,
 			ride.StartTime,
 			ride.EndTime,

@@ -31,7 +31,16 @@
       <Calendar/>
       <LoginForm/>
       <RegisterForm/>
-      <v-snackbar v-model="snackbar" :timeout="10000" :color="alert.type">{{ alert.message }}</v-snackbar>
+      <v-snackbar v-model="snackbar" :timeout="timeout" :color="alert.type">
+        {{ alert.message }}
+        <v-btn
+            dark
+            text
+            @click="snackbar = false"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-snackbar>
     </v-content>
     <v-footer>
       <v-spacer></v-spacer>
@@ -56,7 +65,7 @@ export default {
   },
   data() {
     return {
-      brandName: constants.brandName
+      brandName: constants.brandName,
     }
   },
   computed: {
@@ -70,6 +79,11 @@ export default {
       set (value) {
         this.$store.dispatch('alert/setVisibility', value)
       }
+    },
+    timeout: {
+      get () {
+        return this.$store.state.alert.timeout
+      }
     }
   },
   methods: {
@@ -81,8 +95,14 @@ export default {
     }
     this.$store.dispatch('alert/info', {
       message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit',
-      visible: true}
-    )
+      timeout: 0
+    })
   }
 };
 </script>
+<style>
+  body {
+    overflow: hidden;
+    overflow-y: auto;
+  }
+</style>

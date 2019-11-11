@@ -16,14 +16,14 @@ const actions = {
                     dispatch('user/showLoginForm', false, {root: true})
                     dispatch('alert/success', {
                         message: `Erfolgreich angemeldet. Schön dich wiederzusehen, ${user.firstName}! :)`,
-                        visible: true
+                        timeout: 6000
                     }, {root: true});
                 },
                 error => {
                     commit('loginFailure', error);
                     dispatch('alert/error', {
                         message: error,
-                        visible: true
+                        timeout: 6000
                     }, {root: true});
                 }
             );
@@ -45,7 +45,7 @@ const actions = {
               () => {
                     commit('registerSuccess');
                     dispatch('alert/success',
-                        { message: `Registrierung erfolgreich! Bitte melde dich an, ${firstName} :)`, visible: true },
+                        { message: `Registrierung erfolgreich! Bitte melde dich an, ${firstName} :)`, timeout: 6000 },
                         { root: true }
                     );
                     dispatch('user/showRegisterForm', false, { root: true });
@@ -53,7 +53,7 @@ const actions = {
                 },
                 error => {
                     commit('registerFailure', error);
-                    dispatch('alert/error', {message: error, visible: true}, { root: true });
+                    dispatch('alert/error', {message: error, timeout: 6000}, { root: true });
                 }
             );
     }

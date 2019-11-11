@@ -1,7 +1,7 @@
 <template>
     <v-row class="fill-height">
         <v-col>
-            <v-sheet height="64">
+            <v-sheet>
                 <v-toolbar flat color="white">
                     <v-btn outlined class="mr-4" @click="setToday">
                         Heute
@@ -54,7 +54,8 @@
                     :now="today"
                     :type="type"
                     :first-interval="7"
-                    :interval-count="15"
+                    :interval-count="17"
+                    :interval-format="(i) => i.time"
                     @click:event="showEvent"
                     @click:more="viewDay"
                     @click:date="viewDay"
@@ -155,7 +156,7 @@
                         date: time.date
                     })
                 } else {
-                    this.$store.dispatch('alert/error', {message: '💡 Bitte melde dich an, um Fahrten hinzuzufügen', visible: true})
+                    this.$store.dispatch('alert/error', {message: '💡 Bitte melde dich an, um Fahrten hinzuzufügen', timeout: 6000})
                 }
             },
             viewDay({date}) {
@@ -241,6 +242,10 @@
         cursor: pointer;
     }
     >>> .v-calendar .v-event-timed {
-        font-size: 16px;
+        font-size: 1.1em;
+        padding: 5px;
+    }
+    >>> .v-calendar-daily__scroll-area {
+        overflow-y: auto;
     }
 </style>
