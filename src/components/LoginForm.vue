@@ -44,7 +44,7 @@
                         </v-container>
                     </v-card-text>
                     <v-card-actions class="mr-2 pb-4 pt-0">
-                        <v-container pt-0>
+                        <v-container class="pt-0 pr-1 pl-1">
                             <v-row dense>
                                 <v-col>
                                     <v-btn

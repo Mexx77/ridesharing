@@ -5,18 +5,9 @@
         <span >{{brandName}} </span>
         <span class="font-weight-light">RIDESHARING</span>
       </v-toolbar-title>
-      <v-btn fab text @click="prev">
-        <v-icon>mdi-chevron-left</v-icon>
-      </v-btn>
-      <v-btn text width="30" @click="focusToday">
-        Heute
-      </v-btn>
-      <v-btn fab text @click="next">
-        <v-icon>mdi-chevron-right</v-icon>
-      </v-btn>
-      <v-menu bottom right v-if="$vuetify.breakpoint.mdAndUp">
+      <v-menu bottom right>
         <template v-slot:activator="{ on }">
-          <v-btn text x-small v-on="on">
+          <v-btn text v-on="on">
             <span>{{ typeToLabel[type] }}</span>
             <v-icon right>mdi-menu-down</v-icon>
           </v-btn>
@@ -28,26 +19,24 @@
           <v-list-item @click="type = '4day'">
             <v-list-item-title>4 Tage</v-list-item-title>
           </v-list-item>
-          <v-list-item @click="type = 'week'">
+          <v-list-item @click="type = 'week'" v-if="$vuetify.breakpoint.mdAndUp">
             <v-list-item-title>Woche</v-list-item-title>
           </v-list-item>
-          <v-list-item @click="type = 'month'">
+          <v-list-item @click="type = 'month'" v-if="$vuetify.breakpoint.mdAndUp">
             <v-list-item-title>Monat</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
       <v-spacer></v-spacer>
-      <div v-if="$store.state.account.status.loggedIn">
-        <span style="vertical-align: text-top">Hi, {{$store.state.account.user.firstName}}!</span>
-        <v-btn small text icon @click="logout">
-          <v-icon>mdi-logout-variant</v-icon>
-        </v-btn>
-      </div>
-      <div v-else>
-        <v-btn small text color="secondary" @click="$store.dispatch('user/showLoginForm', true)">
-          <v-icon>mdi-login-variant</v-icon>&nbsp;Anmelden
-        </v-btn>
-      </div>
+      <v-btn fab text @click="prev">
+        <v-icon>mdi-chevron-left</v-icon>
+      </v-btn>
+      <v-btn text width="30" @click="focusToday">
+        Heute
+      </v-btn>
+      <v-btn fab text @click="next">
+        <v-icon>mdi-chevron-right</v-icon>
+      </v-btn>
     </v-app-bar>
 
     <v-content v-touch:swipe.left="next" v-touch:swipe.right="prev">
@@ -65,31 +54,19 @@
         </v-btn>
       </v-snackbar>
     </v-content>
-    <v-footer>
-      <v-menu bottom right v-if="$vuetify.breakpoint.smAndDown">
-        <template v-slot:activator="{ on }">
-          <v-btn text v-on="on">
-            <span>{{ typeToLabel[type] }}</span>
-            <v-icon right>mdi-menu-down</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="type = 'day'">
-            <v-list-item-title>Tag</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = '4day'">
-            <v-list-item-title>4 Tage</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = 'week'">
-            <v-list-item-title>Woche</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = 'month'">
-            <v-list-item-title>Monat</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+    <v-footer fixed>
       <v-spacer></v-spacer>
-      <div>&copy; {{ new Date().getFullYear() }}</div>
+      <div v-if="$store.state.account.status.loggedIn">
+          <span style="vertical-align: text-top">Hi, {{$store.state.account.user.firstName}}!</span>
+          <v-btn class="pr-2 pl-2 pt-0" text color="secondary" @click="logout">
+            <v-icon>mdi-logout-variant</v-icon> Logout
+          </v-btn>
+      </div>
+      <div v-else>
+        <v-btn class="pa-2" text color="secondary" @click="$store.dispatch('user/showLoginForm', true)">
+          <v-icon>mdi-login-variant</v-icon>&nbsp;Anmelden
+        </v-btn>
+      </div>
     </v-footer>
   </v-app>
 </template>
@@ -179,7 +156,8 @@ export default {
 </script>
 <style>
   .v-application--wrap .v-toolbar__content{
-    padding: 0 5px;
+    padding: 0 5px 0 15px;
+    background: #fafafa;
   }
   .theme--light.v-application.v-application--is-ltr {
     background: white;

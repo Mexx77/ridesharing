@@ -159,7 +159,7 @@
     }
 
     >>> .v-calendar .v-event-timed {
-        font-size: 1.1em;
+        font-size: 1em;
         padding: 5px;
     }
 
