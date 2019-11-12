@@ -42,7 +42,8 @@ const actions = {
             startTime: state.ride.startTime,
             endTime: state.ride.endTime,
             bigCarNeeded: state.ride.bigCarNeeded,
-            date: state.ride.date
+            date: state.ride.date,
+            userId: state.ride.userId
         }
         if (state.ride.carName !== "" && state.ride.carName !== undefined) {
             ride.carName = state.ride.carName
@@ -115,7 +116,8 @@ const actions = {
                     isUpdate: true,
                     carName: state.selectedEvent.carName,
                     id: state.selectedEvent.id,
-                    date: state.selectedEvent.date
+                    date: state.selectedEvent.date,
+                    userId: state.selectedEvent.userId
                 })
             } else {
                 let ride = getDefaultRideState()
