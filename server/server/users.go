@@ -21,7 +21,7 @@ const tokenExpiryTimeMinutes = 60 * 24
 type user struct {
 	FirstName string    `json:"firstName,omitempty" bson:"firstName"`
 	LastName  string    `json:"lastName,omitempty" bson:"lastName"`
-	Username  string    `json:"username" bson:",omitempty"`
+	Username  string    `json:"username,omitempty" bson:",omitempty"`
 	Password  string    `json:"password,omitempty"`
 	Phone     string    `json:"phone,omitempty"`
 	Token     string    `json:"token" bson:",omitempty"`
@@ -30,8 +30,8 @@ type user struct {
 }
 
 type Claims struct {
-	Username string `json:"username"`
-	IsAdmin  bool   `json:"isAdmin"`
+	UsernamePhone string `json:"usernamePhone"`
+	IsAdmin       bool   `json:"isAdmin"`
 	jwt.StandardClaims
 }
 
@@ -103,7 +103,7 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 
 		expirationTime := time.Now().Add(tokenExpiryTimeMinutes * time.Minute)
 		claims := &Claims{
-			Username: payload.Username,
+			UsernamePhone: payload.Username,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: expirationTime.Unix(),
 			},
@@ -154,7 +154,6 @@ func (s *server) refreshTokenHandler() http.HandlerFunc {
 		}
 
 		user := user{
-			Username: claims.Username,
 			Token:    newTokenString,
 			Expires:  expirationTime,
 		}
@@ -340,14 +339,24 @@ func (s *server) isAdmin(r *http.Request) bool {
 		logging.Warning.Printf("Token invalid: %s", err)
 		return false
 	}
+	filter := bson.D{
+		{"$or", bson.A{
+			bson.D{
+				{"username", claims.UsernamePhone},
+			},
+			bson.D{
+				{"phone", claims.UsernamePhone},
+			},
+		}},
+	}
 	var user user
-	err = s.users.FindOne(context.TODO(),bson.D{{"username", claims.Username}}).Decode(&user)
+	err = s.users.FindOne(context.TODO(),filter).Decode(&user)
 	if err != nil {
 		logging.Error.Printf("Error finding user %s", err)
 		return false
 	}
 	if !user.IsAdmin {
-		logging.Warning.Printf("Token is valid but %s is not admin", claims.Username)
+		logging.Warning.Printf("Token is valid but %s is not admin", claims.UsernamePhone)
 		return false
 	}
 	return true
