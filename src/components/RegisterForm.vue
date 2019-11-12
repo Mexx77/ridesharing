@@ -127,10 +127,10 @@
             ...mapState('account', ['status']),
             showRegisterForm: {
                 get () {
-                    return this.$store.state.user.showRegisterForm
+                    return this.$store.state.account.showRegisterForm
                 },
                 set (v) {
-                    this.$store.commit('user/showRegisterForm', v)
+                    this.$store.commit('account/showRegisterForm', v)
                 }
             }
         },

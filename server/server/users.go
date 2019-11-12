@@ -9,6 +9,7 @@ import (
 	"github.com/Mexx77/ridesharing/logging"
 	"github.com/dgrijalva/jwt-go"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
@@ -19,19 +20,21 @@ import (
 const tokenExpiryTimeMinutes = 60 * 24
 
 type user struct {
-	FirstName string    `json:"firstName,omitempty" bson:"firstName"`
-	LastName  string    `json:"lastName,omitempty" bson:"lastName"`
-	Username  string    `json:"username,omitempty" bson:",omitempty"`
-	Password  string    `json:"password,omitempty"`
-	Phone     string    `json:"phone,omitempty"`
-	Token     string    `json:"token" bson:",omitempty"`
-	Expires   time.Time `json:"expires" bson:",omitempty"`
-	IsAdmin   bool      `json:"isAdmin" bson:"isAdmin"`
+	Id            primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	FirstName     string             `json:"firstName,omitempty" bson:"firstName"`
+	LastName      string             `json:"lastName,omitempty" bson:"lastName"`
+	Username      string             `json:"username,omitempty" bson:",omitempty"`
+	UsernamePhone string             `json:"usernamePhone,omitempty"`
+	Password      string             `json:"password,omitempty"`
+	Phone         string             `json:"phone,omitempty"`
+	Token         string             `json:"token" bson:",omitempty"`
+	Expires       time.Time          `json:"expires" bson:",omitempty"`
+	IsAdmin       bool               `json:"isAdmin" bson:"isAdmin"`
 }
 
 type Claims struct {
-	UsernamePhone string `json:"usernamePhone"`
-	IsAdmin       bool   `json:"isAdmin"`
+	UserId   primitive.ObjectID `json:"userId"`
+	Username string             `json:"username"`
 	jwt.StandardClaims
 }
 
@@ -70,10 +73,10 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 		filter := bson.D{
 			{"$or", bson.A{
 				bson.D{
-					{"username", payload.Username},
+					{"username", payload.UsernamePhone},
 				},
 				bson.D{
-					{"phone", payload.Username},
+					{"phone", payload.UsernamePhone},
 				},
 			}},
 		}
@@ -82,20 +85,20 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 		err = res.Decode(&user)
 		if err == mongo.ErrNoDocuments {
 			logging.Warning.Printf("Username/phone not found. Auth failed. %s\n", body)
-			rsp := Response{ Message: "Kein Benutzer mit diesem/r Benutzername/Handy-Nr. gefunden" }
+			rsp := Response{Message: "Kein Benutzer mit diesem/r Benutzername/Handy-Nr. gefunden"}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusUnauthorized)
 			return
 		} else if err != nil {
 			logging.Error.Printf("Failed to lookup user at mongo %s\n", body)
-			rsp := Response{ Message: "Sorry, konnte deine Daten nicht überprüfen" }
+			rsp := Response{Message: "Sorry, konnte deine Daten nicht überprüfen"}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusInternalServerError)
 			return
 		}
-		if !checkPasswordHash(payload.Password,user.Password){
+		if !checkPasswordHash(payload.Password, user.Password) {
 			logging.Warning.Printf("Password incorrect. Auth failed. %s\n", body)
-			rsp := Response{ Message: "Benutzername/Handy-Nr. und Passwort stimmen nicht überein" }
+			rsp := Response{Message: "Benutzername/Handy-Nr. und Passwort stimmen nicht überein"}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusUnauthorized)
 			return
@@ -103,7 +106,8 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 
 		expirationTime := time.Now().Add(tokenExpiryTimeMinutes * time.Minute)
 		claims := &Claims{
-			UsernamePhone: payload.Username,
+			Username: user.Username,
+			UserId:   user.Id,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: expirationTime.Unix(),
 			},
@@ -154,8 +158,8 @@ func (s *server) refreshTokenHandler() http.HandlerFunc {
 		}
 
 		user := user{
-			Token:    newTokenString,
-			Expires:  expirationTime,
+			Token:   newTokenString,
+			Expires: expirationTime,
 		}
 
 		userJson, _ := json.Marshal(user)
@@ -216,36 +220,36 @@ func (s *server) registerHandler() http.HandlerFunc {
 		logging.Info.Println(body)
 
 		if len(payload.FirstName) < 2 {
-			rsp := Response{ Message: "Vorname muss mind. 2 Zeichen lang sein" }
+			rsp := Response{Message: "Vorname muss mind. 2 Zeichen lang sein"}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
 		}
 		if len(payload.LastName) < 2 {
-			rsp := Response{ Message: "Nachname muss mind. 2 Zeichen lang sein" }
+			rsp := Response{Message: "Nachname muss mind. 2 Zeichen lang sein"}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
 		}
 		if payload.Username != "" {
 			if len(payload.Username) < 3 {
-				rsp := Response{ Message: "Benutzername muss mind. 3 Zeichen lang sein" }
+				rsp := Response{Message: "Benutzername muss mind. 3 Zeichen lang sein"}
 				rspJson, _ := json.Marshal(rsp)
 				http.Error(w, string(rspJson), http.StatusBadRequest)
 				return
 			}
 
-			filter := bson.D{{"username",  payload.Username}}
+			filter := bson.D{{"username", payload.Username}}
 			var user user
 			err := s.users.FindOne(context.TODO(), filter, options.FindOne()).Decode(&user)
 			if err == nil {
-				rsp := Response{ Message: fmt.Sprintf("Der Benutzername %s existiert bereits", payload.Username) }
+				rsp := Response{Message: fmt.Sprintf("Der Benutzername %s existiert bereits", payload.Username)}
 				rspJson, _ := json.Marshal(rsp)
 				http.Error(w, string(rspJson), http.StatusBadRequest)
 				return
 			} else if err != mongo.ErrNoDocuments {
 				logging.Error.Printf("Fehler beim Überprüfen eines neuen Benutzernamens (%s): %s\n", payload.Username, err.Error())
-				rsp := Response{ Message: "Sorry, Fehler beim Prüfen des Benutzernamens" }
+				rsp := Response{Message: "Sorry, Fehler beim Prüfen des Benutzernamens"}
 				rspJson, _ := json.Marshal(rsp)
 				http.Error(w, string(rspJson), http.StatusBadRequest)
 				return
@@ -253,14 +257,14 @@ func (s *server) registerHandler() http.HandlerFunc {
 		}
 
 		if len(payload.Password) < 8 {
-			rsp := Response{ Message: "Passwort muss mind. 8 Zeichen lang sein" }
+			rsp := Response{Message: "Passwort muss mind. 8 Zeichen lang sein"}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
 		}
 		err = validPassword(payload.Password)
 		if err != nil {
-			rsp := Response{ Message: err.Error() }
+			rsp := Response{Message: err.Error()}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
@@ -268,7 +272,7 @@ func (s *server) registerHandler() http.HandlerFunc {
 		payload.Password, err = hashPassword(payload.Password)
 		if err != nil {
 			logging.Error.Printf("Hashing password failed: %s\n", err.Error())
-			rsp := Response{ Message: "Sorry, Fehler beim sicheren Speichern deines Passworts" }
+			rsp := Response{Message: "Sorry, Fehler beim sicheren Speichern deines Passworts"}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusInternalServerError)
 			return
@@ -276,22 +280,22 @@ func (s *server) registerHandler() http.HandlerFunc {
 
 		phoneMatched, _ := regexp.Match(`^01[567][0-9]{8,11}$`, []byte(payload.Phone))
 		if !phoneMatched {
-			rsp := Response{ Message: "Handy-Nr. muss im Format 01 {5,6,7} 12345678 [901] sein" }
+			rsp := Response{Message: "Handy-Nr. muss im Format 01 {5,6,7} 12345678 [901] sein"}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
 		}
-		filter := bson.D{{"phone",  payload.Phone}}
+		filter := bson.D{{"phone", payload.Phone}}
 		var user user
 		err = s.users.FindOne(context.TODO(), filter, options.FindOne()).Decode(&user)
 		if err == nil {
-			rsp := Response{ Message: fmt.Sprintf("Die Handy-Nr. %s wird bereits von %s verwendet", payload.Phone, user.Username) }
+			rsp := Response{Message: fmt.Sprintf("Die Handy-Nr. %s wird bereits von %s verwendet", payload.Phone, user.Username)}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusBadRequest)
 			return
 		} else if err != mongo.ErrNoDocuments {
 			logging.Error.Printf("Fehler beim Überprüfen der Handy-Nr. (%s): %s\n", payload.Phone, err.Error())
-			rsp := Response{ Message: "Sorry, Fehler beim Überprüfen der Handy-Nr." }
+			rsp := Response{Message: "Sorry, Fehler beim Überprüfen der Handy-Nr."}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusInternalServerError)
 			return
@@ -300,7 +304,7 @@ func (s *server) registerHandler() http.HandlerFunc {
 		_, err = s.users.InsertOne(context.TODO(), payload)
 		if err != nil {
 			logging.Error.Printf("Unable writing user %v to mongo: %v", payload, err)
-			rsp := Response{ Message: "Sorry, konnte dich nicht registieren" }
+			rsp := Response{Message: "Sorry, konnte dich nicht registieren"}
 			rspJson, _ := json.Marshal(rsp)
 			http.Error(w, string(rspJson), http.StatusInternalServerError)
 			return
@@ -310,14 +314,16 @@ func (s *server) registerHandler() http.HandlerFunc {
 	}
 }
 
-func (s *server) loggedInOnly(h http.HandlerFunc) http.HandlerFunc {
+func (s *server) loggedInOnlyAddUserId(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tknStr := r.Header.Get("Authorization")
-		if _, err := s.tokenIsValid(tknStr); err != nil {
+		claims, err := s.tokenIsValid(tknStr)
+		if err != nil {
 			logging.Warning.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+		r.Header.Add("userId", claims.UserId.Hex())
 		h(w, r)
 	}
 }
@@ -342,30 +348,24 @@ func (s *server) isAdmin(r *http.Request) bool {
 	filter := bson.D{
 		{"$or", bson.A{
 			bson.D{
-				{"username", claims.UsernamePhone},
+				{"username", claims.Username},
 			},
 			bson.D{
-				{"phone", claims.UsernamePhone},
+				{"phone", claims.Username},
 			},
 		}},
 	}
 	var user user
-	err = s.users.FindOne(context.TODO(),filter).Decode(&user)
+	err = s.users.FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		logging.Error.Printf("Error finding user %s", err)
 		return false
 	}
 	if !user.IsAdmin {
-		logging.Warning.Printf("Token is valid but %s is not admin", claims.UsernamePhone)
+		logging.Warning.Printf("Token is valid but %s is not admin", claims.Username)
 		return false
 	}
 	return true
-}
-
-func (s *server) test() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "visible to logged-on users only")
-	}
 }
 
 func (s *server) tokenIsValid(tknStr string) (claims *Claims, err error) {

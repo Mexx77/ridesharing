@@ -22,7 +22,7 @@
                             <v-row dense>
                                 <v-col cols="12">
                                     <v-text-field
-                                        v-model="username"
+                                        v-model="usernamePhone"
                                         prepend-icon="mdi-account"
                                         label="Handy-Nr. oder Benutzername*"
                                         :rules="[v => !!v || 'benötigt']"
@@ -51,7 +51,8 @@
                                         text
                                         color="primary"
                                         @click="handleRegister"
-                                    >Registrieren</v-btn>
+                                    >Registrieren
+                                    </v-btn>
                                 </v-col>
                                 <v-spacer></v-spacer>
                                 <v-col>
@@ -71,40 +72,40 @@
 </template>
 
 <script>
-    import { mapState, mapActions } from 'vuex'
+  import {mapState, mapActions} from 'vuex'
 
-    export default {
-        data() {
-            return {
-                username: '',
-                password: '',
-                showPassword: false,
-                formIsValid: false
-            }
+  export default {
+    data() {
+      return {
+        usernamePhone: '',
+        password: '',
+        showPassword: false,
+        formIsValid: false
+      }
+    },
+    computed: {
+      ...mapState('account', ['status']),
+      showLoginForm: {
+        get() {
+          return this.$store.state.account.showLoginForm
         },
-        computed: {
-            ...mapState('account', ['status']),
-            showLoginForm: {
-                get () {
-                    return this.$store.state.user.showLoginForm
-                },
-                set (v) {
-                    this.$store.commit('user/showLoginForm', v)
-                }
-            }
-        },
-        methods: {
-            ...mapActions('account', ['login']),
-            handleLogin() {
-                if (this.$refs.form.validate()) {
-                    const { username, password } = this;
-                    this.login({ username, password })
-                }
-            },
-            handleRegister() {
-                this.showLoginForm = false;
-                this.$store.dispatch('user/showRegisterForm', true)
-            }
+        set(v) {
+          this.$store.commit('account/showLoginForm', v)
         }
+      }
+    },
+    methods: {
+      ...mapActions('account', ['login']),
+      handleLogin() {
+        if (this.$refs.form.validate()) {
+          const {usernamePhone, password} = this;
+          this.login({usernamePhone, password})
+        }
+      },
+      handleRegister() {
+        this.showLoginForm = false;
+        this.$store.dispatch('account/showRegisterForm', true)
+      }
     }
+  }
 </script>

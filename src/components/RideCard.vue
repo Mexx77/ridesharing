@@ -16,17 +16,21 @@
             >
                 <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
                 <v-spacer/>
-                <v-btn @click="selectedOpen = false" icon small><v-icon>mdi-close</v-icon></v-btn>
+                <v-btn @click="selectedOpen = false" icon small>
+                    <v-icon>mdi-close</v-icon>
+                </v-btn>
             </v-toolbar>
             <v-card-text class="pb-0">
                 <span v-html="selectedEvent.details"></span>
             </v-card-text>
             <v-card-actions>
                 <v-btn v-if="isAdmin" text color="primary" @click="editRide">
-                    <v-icon>mdi-pencil</v-icon> Ändern
+                    <v-icon>mdi-pencil</v-icon>
+                    Ändern
                 </v-btn>
-                <v-btn v-if="isAdmin" text color="red" @click="deleteRide">
-                    <v-icon>mdi-delete</v-icon> Löschen
+                <v-btn v-if="isAdmin || isMyRide" text color="red" @click="deleteRide">
+                    <v-icon>mdi-delete</v-icon>
+                    Löschen
                 </v-btn>
             </v-card-actions>
         </v-card>
@@ -34,49 +38,51 @@
 </template>
 
 <script>
-    import * as helper from '../_services/helper'
-    import {mapActions} from 'vuex'
+  import * as helper from '../_services/helper'
+  import {mapActions} from 'vuex'
 
-    export default {
-        computed: {
-            selectedOpen: {
-                get () {
-                  return this.$store.state.ride.selectedOpen
-                },
-                set (value) {
-                  this.$store.commit('ride/setSelectedOpen', value)
-                }
-            },
-            selectedEvent: {
-                get () {
-                  return this.$store.state.ride.selectedEvent
-                }
-            },
-            isAdmin: function () {
-                return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
-            }
+  export default {
+    computed: {
+      selectedOpen: {
+        get() {
+          return this.$store.state.ride.selectedOpen
         },
-        methods: {
-            ...mapActions('ride', ['delete']),
-            deleteRide() {
-                const confirmed = confirm(`Die Fahrt ${this.selectedEvent.name} wirklich löschen?`)
-                if (!confirmed) {
-                    return
-                }
-                this.delete(this.selectedEvent.id)
-            },
-            editRide() {
-                this.$store.dispatch('ride/showAddUpdateRideForm', {visible: true, isUpdate: true})
-            },
-            getEventColor: helper.getEventColor,
-            getEventTextColor: helper.getEventTextColor
-        },
-        data() {
-            return {
-
-            }
+        set(value) {
+          this.$store.commit('ride/setSelectedOpen', value)
         }
+      },
+      selectedEvent: {
+        get() {
+          return this.$store.state.ride.selectedEvent
+        }
+      },
+      isAdmin: function () {
+        return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
+      },
+      isMyRide: function () {
+        return this.$store.state.account.status.loggedIn &&
+          this.$store.state.account.user.id === this.selectedEvent.userId
+      }
+    },
+    methods: {
+      ...mapActions('ride', ['delete']),
+      deleteRide() {
+        const confirmed = confirm(`Die Fahrt ${this.selectedEvent.name} wirklich löschen?`)
+        if (!confirmed) {
+          return
+        }
+        this.delete(this.selectedEvent.id)
+      },
+      editRide() {
+        this.$store.dispatch('ride/showAddUpdateRideForm', {visible: true, isUpdate: true})
+      },
+      getEventColor: helper.getEventColor,
+      getEventTextColor: helper.getEventTextColor
+    },
+    data() {
+      return {}
     }
+  }
 </script>
 <style scoped>
     >>> td:first-child {

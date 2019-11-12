@@ -63,7 +63,7 @@
           </v-btn>
       </div>
       <div v-else>
-        <v-btn class="pa-2" text color="secondary" @click="$store.dispatch('user/showLoginForm', true)">
+        <v-btn class="pa-2" text color="secondary" @click="$store.dispatch('account/showLoginForm', true)">
           <v-icon>mdi-login-variant</v-icon>&nbsp;Anmelden
         </v-btn>
       </div>

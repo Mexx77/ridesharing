@@ -26,6 +26,7 @@ type ride struct {
 	Date		 string `json:"date" bson:",omitempty"`
 	Name         string `json:"name" bson:"-"`
 	Details      string `json:"details" bson:"-"`
+	UserId		 primitive.ObjectID `json:"userId,omitempty" bson:"userId,omitempty"`
 }
 
 func (s *server) ridesHandler() http.HandlerFunc {
@@ -108,6 +109,20 @@ func (s *server) rideAddHandler() http.HandlerFunc {
 				return
 			}
 		}
+		userId := r.Header.Get("userId")
+		if userId == "" {
+			msg := "unable to read userId from HEADER"
+			logging.Error.Println(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+		payload.UserId, err = primitive.ObjectIDFromHex(userId)
+		if err != nil {
+			msg := "unable to parse userId"
+			logging.Error.Println(msg, userId, err.Error())
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
 
 		var result *mongo.InsertOneResult
 		result, err = s.rides.InsertOne(context.TODO(), payload)
@@ -176,23 +191,42 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 			http.Error(w, errorMsg, http.StatusBadRequest)
 			return
 		}
-
 		objId, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
 			logging.Error.Println("unable to read ObjectID from string: ", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		deletePipeline := bson.D{
-			{"_id", objId},
+
+		userIdStr := r.Header.Get("userId")
+		if userIdStr == "" {
+			msg := "unable to read userId from HEADER"
+			logging.Error.Println(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
 		}
-		_, err = s.rides.DeleteOne(context.TODO(),deletePipeline)
+		var ride ride
+		err = s.rides.FindOne(context.TODO(), bson.D{{"_id",objId}}).Decode(&ride)
 		if err != nil {
-			logging.Error.Println("unable to delete ride: ", err)
+			logging.Error.Printf("Error finding ride for deletion %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
+
+		isAdmin := s.isAdmin(r)
+		if userIdStr == ride.UserId.Hex() || isAdmin {
+			_, err = s.rides.DeleteOne(context.TODO(), bson.D{{"_id", objId}})
+			if err != nil {
+				logging.Error.Println("unable to delete ride: ", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.WriteHeader(http.StatusNoContent)
+		} else {
+			logging.Error.Printf("delete unauthorized: userId %s, isAdmin %t, ride %v", userIdStr, isAdmin, ride)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 	}
 }
 
