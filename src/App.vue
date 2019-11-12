@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app>
+      <v-icon class="ml-3" large>mdi-bus-school</v-icon>
       <v-toolbar-title class="headline text-uppercase mr-4 ml-3" v-if="$vuetify.breakpoint.mdAndUp">
         <span >{{brandName}} </span>
         <span class="font-weight-light">RIDESHARING</span>
@@ -147,10 +148,13 @@ export default {
     if (this.$store.state.account.status.loggedIn) {
       this.$store.dispatch('account/refreshToken')
     }
-    this.$store.dispatch('alert/info', {
-      message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit',
-      timeout: 15000
-    })
+    if (!this.$store.state.account.user) {
+      this.$store.dispatch('alert/info', {
+        message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit',
+        timeout: 20000
+      })
+    }
+
   }
 };
 </script>
