@@ -5,14 +5,11 @@
         :close-on-click="true"
         :activator="this.$store.state.ride.selectedElement"
         offset-x
+        min-width="270"
         max-width="400"
         @keydown.esc="selectedOpen = false"
     >
-        <v-card
-            color="grey lighten-4"
-            min-width="300px"
-            flat
-        >
+        <v-card color="grey lighten-4" flat>
             <v-toolbar
                 :color="selectedEvent.getEventColor"
                 :style="{color: selectedEvent.getEventTextColor}"

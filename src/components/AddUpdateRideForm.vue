@@ -15,8 +15,8 @@
                         <v-toolbar-title>
                             <v-icon class="pb-1">mdi-car</v-icon>
                             <template v-if="isUpdate">
-                                <span v-if="$vuetify.breakpoint.mdAndUp"> Fahrt nach</span>
-                                <span> {{destination}} ({{driver}})</span>
+                                <span v-if="$vuetify.breakpoint.mdAndUp"> Fahrt </span>
+                                <span> {{destination}} ← {{driver}}</span>
                             </template>
                             <span v-else> Reservierung am {{germanDate}}</span>
                         </v-toolbar-title>

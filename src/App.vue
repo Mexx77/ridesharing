@@ -149,7 +149,7 @@ export default {
     }
     this.$store.dispatch('alert/info', {
       message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit',
-      timeout: 0
+      timeout: 15000
     })
   }
 };
