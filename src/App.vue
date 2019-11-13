@@ -150,7 +150,7 @@ export default {
     }
     if (!this.$store.state.account.user) {
       this.$store.dispatch('alert/info', {
-        message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit',
+        message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit (Anmeldung erforderlich)',
         timeout: 20000
       })
     }
