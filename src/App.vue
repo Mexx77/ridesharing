@@ -3,7 +3,6 @@
     <v-app-bar app>
       <v-icon class="ml-3" large>mdi-bus-school</v-icon>
       <v-toolbar-title class="headline text-uppercase mr-4 ml-3" v-if="$vuetify.breakpoint.mdAndUp">
-        <span >{{brandName}} </span>
         <span class="font-weight-light">RIDESHARING</span>
       </v-toolbar-title>
       <v-menu bottom right>
