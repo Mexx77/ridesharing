@@ -59,7 +59,12 @@
                                     <v-btn @click="showLoginForm = false">Abbrechen</v-btn>
                                 </v-col>
                                 <v-col>
-                                    <v-btn @click="handleLogin">Login</v-btn>
+                                    <v-btn @click="handleLogin" :disabled="status.loggingIn">
+                                        <v-progress-circular color="primary" v-if="status.loggingIn"
+                                                             size="12" width="2" indeterminate></v-progress-circular>
+                                        <span v-if="status.registering">&nbsp;</span>
+                                        Login
+                                    </v-btn>
                                 </v-col>
                             </v-row>
                         </v-container>

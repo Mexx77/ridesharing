@@ -44,7 +44,7 @@
       <Calendar ref="calendar"></Calendar>
       <LoginForm/>
       <RegisterForm/>
-      <v-snackbar v-model="snackbar" :timeout="timeout" :color="alert.type">
+      <v-snackbar top v-model="snackbar" :timeout="timeout" :color="alert.type">
         {{ alert.message }}
         <v-btn
             dark
@@ -150,8 +150,8 @@ export default {
     }
     if (!this.$store.state.account.user) {
       this.$store.dispatch('alert/info', {
-        message: '💡 Um eine Fahrt hinzuzufügen, klicke neben die ungefähre Startzeit (Anmeldung erforderlich)',
-        timeout: 20000
+        message: '💡 Um eine Fahrt hinzuzufügen, tippe neben die ungefähre Startzeit (Anmeldung erforderlich)',
+        timeout: 21000
       })
     }
 
