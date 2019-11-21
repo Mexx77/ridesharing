@@ -104,13 +104,7 @@
   export default {
     data() {
       return {
-        user: {
-          firstName: '',
-          lastName: '',
-          username: '',
-          password: '',
-          phone: ''
-        },
+        user: this.getDefaultUser(),
         showPassword: false,
         formIsValid: false,
         rules: {
@@ -144,9 +138,21 @@
       ...mapActions('account', ['register']),
       handleRegister() {
         if (this.$refs.form.validate()) {
-          this.register(this.user)
+          this.register(this.user).then(this.resetUser)
         }
       },
+      resetUser() {
+        this.user = this.getDefaultUser()
+      },
+      getDefaultUser() {
+        return {
+          firstName: '',
+          lastName: '',
+          username: '',
+          password: '',
+          phone: ''
+        }
+      }
     }
   }
 </script>
