@@ -9,6 +9,7 @@
                 ref="form"
                 v-model="formIsValid"
                 lazy-validation
+                @keyup.native.enter="handleLogin"
             >
                 <v-card>
                     <v-toolbar color="primary" dark>

@@ -9,6 +9,7 @@
                 ref="form"
                 v-model="formIsValid"
                 lazy-validation
+                @keyup.native.enter="validateAndSubmitForm"
             >
                 <v-card>
                     <v-toolbar color="primary" dark>
@@ -108,115 +109,116 @@
 </template>
 
 <script>
-    import {mapActions} from 'vuex'
-    const constants = require('../_services/constants')
+  import {mapActions} from 'vuex'
 
-    export default {
-        data() {
-            return {
-                formIsValid: false,
-                cars: constants.cars
-            }
-        },
-        computed: {
-            saveButtonText() {
-                if(this.isUpdate){
-                    return 'Fahrt aktualisieren'
-                } else if (this.isAdmin){
-                    return 'hinzufügen'
-                } else {
-                    return 'anfragen'
-                }
-            },
-            rideDate() {
-                return this.$store.state.ride.ride.date
-            },
-            germanDate() {
-                if (this.rideDate == undefined) return undefined
-                const p = this.rideDate.split(/\D/g)
-                return [p[2], p[1], p[0]].join(".")
-            },
-            startTime: {
-                get () {
-                    return this.$store.state.ride.ride.startTime
-                },
-                set (value) {
-                    this.$store.commit('ride/setStartTime', value)
-                }
-            },
-            endTime: {
-                get () {
-                    return this.$store.state.ride.ride.endTime
-                },
-                set (value) {
-                    this.$store.commit('ride/setEndTime', value)
-                }
-            },
-            showAddEventForm: {
-                get () {
-                    return this.$store.state.ride.showAddEventForm
-                },
-                set (value) {
-                    this.$store.commit('ride/showAddEventForm', value)
-                }
-            },
-            driver: {
-                get () {
-                    return this.$store.state.ride.ride.driver
-                },
-                set (value) {
-                    this.$store.commit('ride/setDriver', value)
-                }
-            },
-            destination: {
-                get () {
-                    return this.$store.state.ride.ride.destination
-                },
-                set (value) {
-                    this.$store.commit('ride/setDestination', value)
-                }
-            },
-            bigCarNeeded: {
-                get () {
-                    return this.$store.state.ride.ride.bigCarNeeded
-                },
-                set (value) {
-                    this.$store.commit('ride/setBigCarNeeded', value)
-                }
-            },
-            isUpdate: {
-                get () {
-                    return this.$store.state.ride.ride.isUpdate
-                }
-            },
-            isAdmin: function () {
-                return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
-            },
-            carName: {
-                get () {
-                    return this.$store.state.ride.ride.carName
-                },
-                set (value) {
-                    this.$store.commit('ride/setCarName', value)
-                }
-            },
-        },
-        methods: {
-            ...mapActions('ride', ['addRide', 'updateRide']),
-            validateAndSubmitForm() {
-                if (this.$refs.form.validate()) {
-                    if (this.isUpdate) {
-                        this.updateRide()
-                    } else {
-                        this.addRide()
-                    }
-                }
-            },
-            closeForm() {
-              this.$refs.form.reset()
-              this.showAddEventForm = false
-            },
-            allowedMinutes: m => m % 15 == 0,
+  const constants = require('../_services/constants')
+
+  export default {
+    data() {
+      return {
+        formIsValid: false,
+        cars: constants.cars
+      }
+    },
+    computed: {
+      saveButtonText() {
+        if (this.isUpdate) {
+          return 'Fahrt aktualisieren'
+        } else if (this.isAdmin) {
+          return 'hinzufügen'
+        } else {
+          return 'anfragen'
         }
+      },
+      rideDate() {
+        return this.$store.state.ride.ride.date
+      },
+      germanDate() {
+        if (this.rideDate == undefined) return undefined
+        const p = this.rideDate.split(/\D/g)
+        return [p[2], p[1], p[0]].join(".")
+      },
+      startTime: {
+        get() {
+          return this.$store.state.ride.ride.startTime
+        },
+        set(value) {
+          this.$store.commit('ride/setStartTime', value)
+        }
+      },
+      endTime: {
+        get() {
+          return this.$store.state.ride.ride.endTime
+        },
+        set(value) {
+          this.$store.commit('ride/setEndTime', value)
+        }
+      },
+      showAddEventForm: {
+        get() {
+          return this.$store.state.ride.showAddEventForm
+        },
+        set(value) {
+          this.$store.commit('ride/showAddEventForm', value)
+        }
+      },
+      driver: {
+        get() {
+          return this.$store.state.ride.ride.driver
+        },
+        set(value) {
+          this.$store.commit('ride/setDriver', value)
+        }
+      },
+      destination: {
+        get() {
+          return this.$store.state.ride.ride.destination
+        },
+        set(value) {
+          this.$store.commit('ride/setDestination', value)
+        }
+      },
+      bigCarNeeded: {
+        get() {
+          return this.$store.state.ride.ride.bigCarNeeded
+        },
+        set(value) {
+          this.$store.commit('ride/setBigCarNeeded', value)
+        }
+      },
+      isUpdate: {
+        get() {
+          return this.$store.state.ride.ride.isUpdate
+        }
+      },
+      isAdmin: function () {
+        return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
+      },
+      carName: {
+        get() {
+          return this.$store.state.ride.ride.carName
+        },
+        set(value) {
+          this.$store.commit('ride/setCarName', value)
+        }
+      },
+    },
+    methods: {
+      ...mapActions('ride', ['addRide', 'updateRide']),
+      validateAndSubmitForm() {
+        if (this.$refs.form.validate()) {
+          if (this.isUpdate) {
+            this.updateRide()
+          } else {
+            this.addRide()
+          }
+        }
+      },
+      closeForm() {
+        this.$refs.form.reset()
+        this.showAddEventForm = false
+      },
+      allowedMinutes: m => m % 15 == 0,
     }
+  }
 </script>
