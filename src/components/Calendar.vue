@@ -11,6 +11,7 @@
                     :event-text-color="getEventTextColor"
                     :event-margin-bottom="3"
                     :event-overlap-threshold=60
+                    :event-name="eventName"
                     :now="today"
                     :type="type"
                     :first-interval="7"
@@ -62,6 +63,9 @@
       },
     },
     methods: {
+      eventName(event) {
+        return `<strong>${event.input.name}</strong><br>${event.start.time} - ${event.end.time}`
+      },
       fourDaysFromNow() {
         return this.dateAddDays(this.today, 3)
       },
