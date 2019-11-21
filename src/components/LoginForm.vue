@@ -105,8 +105,11 @@
       handleLogin() {
         if (this.$refs.form.validate()) {
           const {usernamePhone, password} = this;
-          this.login({usernamePhone, password})
+          this.login({usernamePhone, password}).then(this.resetData)
         }
+      },
+      resetData() {
+        Object.assign(this.$data, this.$options.data.apply(this))
       },
       handleRegister() {
         this.showLoginForm = false;

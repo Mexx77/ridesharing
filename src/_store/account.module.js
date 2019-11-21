@@ -10,26 +10,31 @@ const state = {
 
 const actions = {
   login({dispatch, commit}, {usernamePhone, password, message}) {
-    commit('loginRequest', {usernamePhone});
+    return new Promise((resolve, reject) => {
 
-    userService.login(usernamePhone, password)
-      .then(
-        user => {
-          commit('loginSuccess', user);
-          dispatch('account/showLoginForm', false, {root: true})
-          dispatch('alert/success', {
-            message: message ? message : `Erfolgreich angemeldet. Schön dich wiederzusehen, ${user.firstName}! :)`,
-            timeout: 10000
-          }, {root: true});
-        },
-        error => {
-          commit('loginFailure', error);
-          dispatch('alert/error', {
-            message: error,
-            timeout: 6000
-          }, {root: true});
-        }
-      );
+      commit('loginRequest', {usernamePhone});
+
+      userService.login(usernamePhone, password)
+        .then(
+          user => {
+            commit('loginSuccess', user);
+            dispatch('account/showLoginForm', false, {root: true})
+            dispatch('alert/success', {
+              message: message ? message : `Erfolgreich angemeldet. Schön dich wiederzusehen, ${user.firstName}! :)`,
+              timeout: 10000
+            }, {root: true});
+            resolve('loginSuccess');
+          },
+          error => {
+            commit('loginFailure', error);
+            dispatch('alert/error', {
+              message: error,
+              timeout: 6000
+            }, {root: true});
+            reject('loginFailure', error);
+          }
+        );
+    })
   },
   logout({commit, dispatch}) {
     const firstName = state.user.firstName
