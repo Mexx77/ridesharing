@@ -24,7 +24,7 @@ type user struct {
 	FirstName     string             `json:"firstName,omitempty" bson:"firstName"`
 	LastName      string             `json:"lastName,omitempty" bson:"lastName"`
 	Username      string             `json:"username,omitempty" bson:",omitempty"`
-	UsernamePhone string             `json:"usernamePhone,omitempty"`
+	UsernamePhone string             `json:"usernamePhone,omitempty" bson:",omitempty"`
 	Password      string             `json:"password,omitempty"`
 	Phone         string             `json:"phone,omitempty"`
 	Token         string             `json:"token" bson:",omitempty"`

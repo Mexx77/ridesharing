@@ -10,7 +10,7 @@
                     :event-color="getEventColor"
                     :event-text-color="getEventTextColor"
                     :event-margin-bottom="3"
-                    :event-overlap-threshold=60
+                    :event-overlap-threshold=90
                     :event-name="eventName"
                     :now="today"
                     :type="type"
@@ -97,7 +97,7 @@
             date: time.date
           })
         } else {
-          this.$store.dispatch('alert/error', {
+          this.$store.dispatch('alert/info', {
             message: '💡 Bitte melde dich an, um Fahrten hinzuzufügen',
             timeout: 6000
           })
