@@ -231,7 +231,7 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 }
 
 func treatRide(ride ride) ride {
-	ride.Name = fmt.Sprintf("%s ← %s", ride.Destination, ride.Driver)
+	ride.Name = fmt.Sprintf("%s 🚌 %s", ride.Destination, ride.Driver)
 	if ride.CarName != "" {
 		ride.Details = fmt.Sprintf(`<table>
 			<tr><td>Ziel</td><td>%s</td></tr>
