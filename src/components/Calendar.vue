@@ -21,6 +21,7 @@
                     @click:date="viewDay"
                     @click:time="addEvent"
                     @change="updateRange"
+                    locale="de"
                 ></v-calendar>
                 <RideCard/>
                 <AddUpdateRideForm/>
