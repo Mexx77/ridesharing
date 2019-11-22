@@ -1,0 +1,12 @@
+{
+  "fileServerFolder": "src/tests/e2e",
+  "fixturesFolder": "src/tests/e2e/fixtures",
+  "integrationFolder": "src/tests/e2e/specs",
+  "pluginsFile": "src/tests/e2e/plugins/index.js",
+  "screenshotsFolder": "src/tests/e2e/screenshots",
+  "supportFile": "src/tests/e2e/support/index.js",
+  "videosFolder": "src/tests/e2e/videos",
+  "viewportWidth": 1300,
+  "viewportHeight": 900,
+  "video": false
+}

@@ -28,6 +28,7 @@
                                         label="Handy-Nr. oder Benutzername*"
                                         :rules="[v => !!v || 'benötigt']"
                                         required
+                                        data-cy="username-phone"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="12">
@@ -39,6 +40,7 @@
                                         :type="showPassword ? 'text' : 'password'"
                                         label="Passwort*"
                                         @click:append="showPassword = !showPassword"
+                                        data-cy="password"
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
@@ -60,7 +62,7 @@
                                     <v-btn @click="showLoginForm = false">Abbrechen</v-btn>
                                 </v-col>
                                 <v-col>
-                                    <v-btn @click="handleLogin" :disabled="status.loggingIn">
+                                    <v-btn @click="handleLogin" :disabled="status.loggingIn" data-cy="login-btn">
                                         <v-progress-circular color="primary" v-if="status.loggingIn"
                                                              size="12" width="2" indeterminate></v-progress-circular>
                                         <span v-if="status.registering">&nbsp;</span>
