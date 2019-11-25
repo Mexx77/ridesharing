@@ -33,8 +33,8 @@ type user struct {
 }
 
 type Claims struct {
-	UserId   primitive.ObjectID `json:"userId"`
-	Username string             `json:"username"`
+	UserId primitive.ObjectID `json:"userId"`
+	Phone  string             `json:"phone"`
 	jwt.StandardClaims
 }
 
@@ -106,8 +106,8 @@ func (s *server) authenticateHandler() http.HandlerFunc {
 
 		expirationTime := time.Now().Add(tokenExpiryTimeMinutes * time.Minute)
 		claims := &Claims{
-			Username: user.Username,
-			UserId:   user.Id,
+			Phone:  user.Phone,
+			UserId: user.Id,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: expirationTime.Unix(),
 			},
@@ -314,16 +314,15 @@ func (s *server) registerHandler() http.HandlerFunc {
 	}
 }
 
-func (s *server) loggedInOnlyAddUserId(h http.HandlerFunc) http.HandlerFunc {
+func (s *server) loggedInOnly(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tknStr := r.Header.Get("Authorization")
-		claims, err := s.tokenIsValid(tknStr)
+		_, err := s.tokenIsValid(tknStr)
 		if err != nil {
 			logging.Warning.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		r.Header.Add("userId", claims.UserId.Hex())
 		h(w, r)
 	}
 }
@@ -338,31 +337,32 @@ func (s *server) adminOnly(h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func (s *server) getUserId(r *http.Request) (primitive.ObjectID, error) {
+	tknStr := r.Header.Get("Authorization")
+	claims, err := s.tokenIsValid(tknStr)
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+	return claims.UserId, nil
+}
+
 func (s *server) isAdmin(r *http.Request) bool {
 	tknStr := r.Header.Get("Authorization")
 	claims, err := s.tokenIsValid(tknStr)
 	if err != nil {
-		logging.Warning.Printf("Token invalid: %s", err)
+		logging.Warning.Printf("token invalid: %s", err)
 		return false
 	}
-	filter := bson.D{
-		{"$or", bson.A{
-			bson.D{
-				{"username", claims.Username},
-			},
-			bson.D{
-				{"phone", claims.Username},
-			},
-		}},
-	}
 	var user user
-	err = s.users.FindOne(context.TODO(), filter).Decode(&user)
-	if err != nil {
-		logging.Error.Printf("Error finding user %s", err)
+	err = s.users.FindOne(context.TODO(), bson.D{{"phone", claims.Phone}}).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		return false
+	} else if err != nil {
+		logging.Warning.Println("db error when checking if admin", err)
 		return false
 	}
 	if !user.IsAdmin {
-		logging.Warning.Printf("Token is valid but %s is not admin", claims.Username)
+		logging.Warning.Printf("token is valid but %s is not admin", claims.Phone)
 		return false
 	}
 	return true

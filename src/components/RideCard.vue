@@ -23,8 +23,11 @@
             <v-card-text class="pb-0">
                 <span v-html="selectedEvent.details"></span>
             </v-card-text>
+            <div v-if="isRideConfirmed && isMyRide && !isAdmin" class="pl-4 pr-4 pt-2 caption">
+                <span class="font-weight-bold">Achtung:</span> Ändern einer bestätigten Fahrt macht diese unbestätigt.
+            </div>
             <v-card-actions>
-                <v-btn v-if="isAdmin" text color="primary" @click="editRide">
+                <v-btn v-if="isAdmin || isMyRide" text color="primary" @click="editRide">
                     <v-icon>mdi-pencil</v-icon>
                     Ändern
                 </v-btn>
@@ -62,6 +65,9 @@
       isMyRide: function () {
         return this.$store.state.account.status.loggedIn &&
           this.$store.state.account.user.id === this.selectedEvent.userId
+      },
+      isRideConfirmed: function () {
+        return this.selectedEvent.hasOwnProperty('carName')
       }
     },
     methods: {

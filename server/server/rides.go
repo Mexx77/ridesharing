@@ -13,20 +13,20 @@ import (
 )
 
 type ride struct {
-	Id 			 primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Driver       string `json:"driver"`
-	CarName      string `json:"carName,omitempty" bson:"carName,omitempty"`
-	CarColor     string `json:"carColor,omitempty" bson:"carColor,omitempty"`
-	Destination  string `json:"destination"`
-	Start        string `json:"start"`
-	End          string `json:"end"`
-	StartTime    string `json:"startTime" bson:"startTime,omitempty"`
-	EndTime      string `json:"endTime" bson:"endTime,omitempty"`
-	BigCarNeeded bool   `json:"bigCarNeeded" bson:"bigCarNeeded"`
-	Date		 string `json:"date" bson:",omitempty"`
-	Name         string `json:"name" bson:"-"`
-	Details      string `json:"details" bson:"-"`
-	UserId		 primitive.ObjectID `json:"userId,omitempty" bson:"userId,omitempty"`
+	Id           primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Driver       string             `json:"driver"`
+	CarName      string             `json:"carName,omitempty" bson:"carName,omitempty"`
+	CarColor     string             `json:"carColor,omitempty" bson:"carColor,omitempty"`
+	Destination  string             `json:"destination"`
+	Start        string             `json:"start"`
+	End          string             `json:"end"`
+	StartTime    string             `json:"startTime" bson:"startTime,omitempty"`
+	EndTime      string             `json:"endTime" bson:"endTime,omitempty"`
+	BigCarNeeded bool               `json:"bigCarNeeded" bson:"bigCarNeeded"`
+	Date         string             `json:"date" bson:",omitempty"`
+	Name         string             `json:"name" bson:"-"`
+	Details      string             `json:"details" bson:"-"`
+	UserId       primitive.ObjectID `json:"userId,omitempty" bson:"userId,omitempty"`
 }
 
 func (s *server) ridesHandler() http.HandlerFunc {
@@ -109,18 +109,10 @@ func (s *server) rideAddHandler() http.HandlerFunc {
 				return
 			}
 		}
-		userId := r.Header.Get("userId")
-		if userId == "" {
-			msg := "unable to read userId from HEADER"
-			logging.Error.Println(msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
-		}
-		payload.UserId, err = primitive.ObjectIDFromHex(userId)
+		payload.UserId, err = s.getUserId(r)
 		if err != nil {
-			msg := "unable to parse userId"
-			logging.Error.Println(msg, userId, err.Error())
-			http.Error(w, msg, http.StatusInternalServerError)
+			logging.Error.Println(err)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
@@ -167,14 +159,37 @@ func (s *server) rideUpdateHandler() http.HandlerFunc {
 			return
 		}
 
+		isAdmin := s.isAdmin(r)
+		if payload.CarName != "" {
+			if !isAdmin {
+				payload.CarName = ""
+				payload.CarColor = ""
+			}
+		}
+
+		if !isAdmin {
+			// Not admin, need to check if user owns ride
+			userObjId, err := s.getUserId(r)
+			if err != nil {
+				logging.Error.Println(err)
+				http.Error(w, err.Error(), http.StatusUnauthorized)
+				return
+			}
+			if userObjId != payload.UserId {
+				logging.Warning.Printf("user %s is not authorized to update record %s", userObjId, body)
+				http.Error(w, "unauthorized to update this record", http.StatusUnauthorized)
+				return
+			}
+		}
+
 		result, err := s.rides.ReplaceOne(context.TODO(), bson.D{{"_id", payload.Id}}, payload)
 		if err != nil {
-			logging.Error.Printf("Unable updating ride %v at mongo: %v", body, err)
+			logging.Error.Printf("Unable to update ride %v at mongo: %v", body, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		logging.Debug.Printf("We updated %v: %s", result.ModifiedCount, body)
+		logging.Debug.Printf("We updated %v: %+v", result.ModifiedCount, payload)
 		payload = treatRide(payload)
 		rideJson, _ := json.Marshal(payload)
 		fmt.Fprint(w, string(rideJson))
@@ -198,15 +213,14 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 			return
 		}
 
-		userIdStr := r.Header.Get("userId")
-		if userIdStr == "" {
-			msg := "unable to read userId from HEADER"
-			logging.Error.Println(msg)
-			http.Error(w, msg, http.StatusInternalServerError)
+		userObjId, err := s.getUserId(r)
+		if err != nil {
+			logging.Error.Println(err)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		var ride ride
-		err = s.rides.FindOne(context.TODO(), bson.D{{"_id",objId}}).Decode(&ride)
+		err = s.rides.FindOne(context.TODO(), bson.D{{"_id", objId}}).Decode(&ride)
 		if err != nil {
 			logging.Error.Printf("Error finding ride for deletion %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -214,7 +228,7 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 		}
 
 		isAdmin := s.isAdmin(r)
-		if userIdStr == ride.UserId.Hex() || isAdmin {
+		if userObjId == ride.UserId || isAdmin {
 			_, err = s.rides.DeleteOne(context.TODO(), bson.D{{"_id", objId}})
 			if err != nil {
 				logging.Error.Println("unable to delete ride: ", err)
@@ -223,7 +237,7 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 			}
 			w.WriteHeader(http.StatusNoContent)
 		} else {
-			logging.Error.Printf("delete unauthorized: userId %s, isAdmin %t, ride %v", userIdStr, isAdmin, ride)
+			logging.Error.Printf("delete unauthorized: userId %s, isAdmin %t, ride %+v", userObjId, isAdmin, ride)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

@@ -4,7 +4,7 @@ export const hostname = process.env.NODE_ENV === 'development' ? 'http://localho
 export const cars = ['Red Bus', 'White Bus', 'e-Auto', 'Little Red'];
 export const carProperties = {
     'Red Bus': { color: colors.red.darken4, isBig: true },
-    'White Bus': { color: colors.white, isBig: true },
+    'White Bus': { color: 'white', isBig: true },
     'e-Auto': { color: colors.blueGrey.darken4, isBig: false },
     'Little Red': { color: colors.pink.darken4, isBig: false }
 };
