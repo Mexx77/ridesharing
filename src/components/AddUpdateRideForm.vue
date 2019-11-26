@@ -95,6 +95,11 @@
                                         v-model="bigCarNeeded"
                                         label="Ich brauche ein großes Auto"
                                     ></v-switch>
+                                    <div v-if="!isAdmin && isRideConfirmed" class="mb-4 caption"><span
+                                        class="font-weight-bold red--text">Achtung:</span> Das
+                                        Ändern einer bestätigten Fahrt macht diese unbestätigt. Ein Admin muss dir dann
+                                        erneut ein Auto zuweisen.
+                                    </div>
                                     <v-btn @click="closeForm">Abbrechen</v-btn>
                                     <v-btn @click="validateAndSubmitForm">{{saveButtonText}}</v-btn>
                                 </v-col>
@@ -123,7 +128,7 @@
     computed: {
       saveButtonText() {
         if (this.isUpdate) {
-          return 'Fahrt aktualisieren'
+          return 'Fahrt ändern'
         } else if (this.isAdmin) {
           return 'hinzufügen'
         } else {
@@ -202,6 +207,9 @@
           this.$store.commit('ride/setCarName', value)
         }
       },
+      isRideConfirmed: function () {
+        return this.$store.state.ride.ride.carName !== '' && this.$store.state.ride.ride.carName !== undefined
+      }
     },
     methods: {
       ...mapActions('ride', ['addRide', 'updateRide']),

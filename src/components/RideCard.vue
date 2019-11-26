@@ -24,7 +24,8 @@
                 <span v-html="selectedEvent.details"></span>
             </v-card-text>
             <div v-if="isRideConfirmed && isMyRide && !isAdmin" class="pl-4 pr-4 pt-2 caption">
-                <span class="font-weight-bold">Achtung:</span> Ändern einer bestätigten Fahrt macht diese unbestätigt.
+                <span class="font-weight-bold red--text">Achtung:</span> Das Ändern einer bestätigten Fahrt macht diese
+                unbestätigt. Ein Admin muss dir dann erneut ein Auto zuweisen.
             </div>
             <v-card-actions>
                 <v-btn v-if="isAdmin || isMyRide" text color="primary" @click="editRide">

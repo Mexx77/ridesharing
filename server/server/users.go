@@ -362,7 +362,6 @@ func (s *server) isAdmin(r *http.Request) bool {
 		return false
 	}
 	if !user.IsAdmin {
-		logging.Warning.Printf("token is valid but %s is not admin", claims.Phone)
 		return false
 	}
 	return true
