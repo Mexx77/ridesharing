@@ -55,6 +55,17 @@
             </v-snackbar>
         </v-content>
         <v-footer fixed>
+            <v-badge v-if="isAdmin" left class="ml-6" :color="unconfirmedRides > 0 ? 'red darken-4' : 'success'">
+                <template v-slot:badge>
+                    <span>{{unconfirmedRides}}</span>
+                </template>
+                <v-tooltip top open-on-hover color="primary">
+                    <template v-slot:activator="{ on }">
+                        <v-icon v-on="on">mdi-bus-school</v-icon>
+                    </template>
+                    <span>unbestätigte Fahrten</span>
+                </v-tooltip>
+            </v-badge>
             <v-spacer></v-spacer>
             <div v-if="$store.state.account.status.loggedIn">
                 <span style="vertical-align: text-top">Hi, {{$store.state.account.user.firstName}}!</span>
@@ -100,6 +111,7 @@
     },
     computed: {
       ...mapState('calendar', ['today']),
+      ...mapState('ride', ['unconfirmedRides']),
       ...mapState({
         alert: state => state.alert
       }),
@@ -131,7 +143,10 @@
         set(value) {
           this.$store.commit('calendar/setFocus', value)
         }
-      }
+      },
+      isAdmin: function () {
+        return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
+      },
     },
     methods: {
       ...mapActions('account', ['logout']),
@@ -143,13 +158,15 @@
       },
       focusToday() {
         this.focus = this.today
-      },
+      }
     },
     mounted: function () {
       if (this.$store.state.account.status.loggedIn) {
         this.$store.dispatch('account/refreshToken')
-      }
-      if (!this.$store.state.account.user) {
+        if (this.$store.state.account.user.isAdmin) {
+          this.$store.dispatch("ride/refreshUnconfirmedRides")
+        }
+      } else {
         this.$store.dispatch('alert/info', {
           message: '💡 Um eine Fahrt hinzuzufügen, tippe neben die ungefähre Startzeit (dafür musst du angemeldet sein)',
           timeout: 21000
@@ -172,5 +189,10 @@
     body {
         overflow: hidden;
         overflow-y: auto;
+    }
+
+    footer .v-badge--left .v-badge__badge {
+        top: 0;
+        left: -26px;
     }
 </style>

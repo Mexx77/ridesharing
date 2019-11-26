@@ -5,7 +5,8 @@ import {userService} from "./user.service";
 export const rideService = {
     delete: _delete,
     add,
-    update
+    update,
+    unconfirmedRides
 };
 
 // prefixed function name with underscore because delete is a reserved word in javascript
@@ -36,6 +37,15 @@ function update(ride) {
     };
 
     return fetch(`${constants.hostname}/ride/update`, requestOptions).then(handleResponse)
+}
+
+function unconfirmedRides() {
+    const requestOptions = {
+        method: 'GET',
+        headers: authHeader()
+    };
+
+    return fetch(`${constants.hostname}/ride/unconfirmedRides`, requestOptions).then(handleResponse)
 }
 
 function handleResponse(response) {

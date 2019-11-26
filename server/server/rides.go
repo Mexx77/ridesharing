@@ -244,6 +244,18 @@ func (s *server) rideDeleteHandler() http.HandlerFunc {
 	}
 }
 
+func (s *server) unconfirmedRidesHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		noUnconfirmed, err := s.rides.CountDocuments(context.TODO(), bson.D{{"carName", primitive.Null{}}})
+		if err != nil {
+			logging.Error.Printf("Error counting unconfirmed rides %s", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprint(w, noUnconfirmed)
+	}
+}
+
 func treatRide(ride ride) ride {
 	ride.Name = fmt.Sprintf("%s 🚌 %s", ride.Destination, ride.Driver)
 	if ride.CarName != "" {

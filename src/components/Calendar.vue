@@ -61,6 +61,9 @@
           this.$store.commit('calendar/setType', value)
         }
       },
+      isAdmin: function () {
+        return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
+      },
     },
     methods: {
       eventName(event) {
@@ -136,6 +139,9 @@
           .get(constants.hostname + '/rides?start=' + start.date + '&end=' + end.date)
           .then((response) => {
             this.$store.commit('ride/setRides', response.data)
+            if (this.isAdmin) {
+              this.$store.dispatch('ride/refreshUnconfirmedRides')
+            }
           });
       }
     },
