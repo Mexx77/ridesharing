@@ -28,10 +28,14 @@ const state = {
 };
 
 const actions = {
-  delete({commit}, id) {
+  delete({commit, dispatch, rootState}, id) {
     rideService.delete(id)
       .then(
-        () => commit('deleteSuccess', id),
+        () => {
+          if (rootState.account.user.isAdmin) {
+            dispatch('refreshUnconfirmedRides')
+          }
+          commit('deleteSuccess', id)}
       );
   },
   updateRide({commit, dispatch, rootState}) {
@@ -98,6 +102,7 @@ const actions = {
         let msg = 'Danke, deine Reservierungsanfrage wurde entgegengenommen'
         if (rootState.account.user.isAdmin) {
           msg = 'Fahrt gespeichert'
+          dispatch('refreshUnconfirmedRides')
         }
         commit('showAddEventForm', false)
         const newRides = state.rides.concat([data])

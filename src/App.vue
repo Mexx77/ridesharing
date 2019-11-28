@@ -193,6 +193,6 @@
 
     footer .v-badge--left .v-badge__badge {
         top: 0;
-        left: -26px;
+        left: -28px;
     }
 </style>
