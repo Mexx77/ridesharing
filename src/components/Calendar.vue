@@ -121,6 +121,7 @@
       showEvent({nativeEvent, event}) {
         const open = () => {
           this.$store.commit('ride/setSelectedEvent', event)
+          this.$store.commit('ride/setRide', event)
           this.$store.commit('ride/setSelectedElement', nativeEvent.target)
           setTimeout(() => this.$store.commit('ride/setSelectedOpen', true), 10)
         }

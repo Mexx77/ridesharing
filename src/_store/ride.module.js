@@ -9,7 +9,6 @@ const getDefaultRideState = () => {
     startTime: defaultStartTime,
     endTime: '',
     bigCarNeeded: false,
-    isUpdate: false,
     carName: '',
     id: '',
     date: ''
@@ -23,7 +22,9 @@ const state = {
   selectedElement: null,
   rides: [],
   ride: getDefaultRideState(),
-  unconfirmedRides: 0
+  isUpdate: false,
+  unconfirmedRides: 0,
+  status: {}
 };
 
 const actions = {
@@ -33,7 +34,8 @@ const actions = {
         () => commit('deleteSuccess', id),
       );
   },
-  updateRide({commit, dispatch}) {
+  updateRide({commit, dispatch, rootState}) {
+    commit('updateRequest')
     const ride = {
       id: state.ride.id,
       driver: state.ride.driver,
@@ -52,16 +54,21 @@ const actions = {
     }
     rideService.update(ride).then(
       data => {
+        commit('updateSuccess')
+        commit('setSelectedEvent', data)
         const newRides = state.rides.filter(r => r.id !== state.ride.id).concat([data])
         commit('setRides', newRides)
         commit('showAddEventForm', false)
-        dispatch('refreshUnconfirmedRides')
+        if (rootState.account.user.isAdmin) {
+          dispatch('refreshUnconfirmedRides')
+        }
         dispatch('alert/success', {
           message: 'Fahrt erfolgreich aktualisiert',
           timeout: 6000
         }, {root: true});
       },
       () => {
+        commit('updateFailure')
         dispatch('alert/error', {
           message: 'Ups, da ist was fehlgeschlagen - sorry',
           timeout: 6000
@@ -70,6 +77,7 @@ const actions = {
     )
   },
   addRide({commit, dispatch, rootState}) {
+    commit('addRequest')
     const ride = {
       driver: state.ride.driver,
       destination: state.ride.destination,
@@ -86,8 +94,9 @@ const actions = {
     }
     rideService.add(ride).then(
       data => {
+        commit('addSuccess')
         let msg = 'Danke, deine Reservierungsanfrage wurde entgegengenommen'
-        if (rootState.account.status.loggedIn && rootState.account.user.isAdmin) {
+        if (rootState.account.user.isAdmin) {
           msg = 'Fahrt gespeichert'
         }
         commit('showAddEventForm', false)
@@ -99,6 +108,7 @@ const actions = {
         }, {root: true});
       },
       () => {
+        commit('addFailure')
         dispatch('alert/error', {
           message: 'Ups, da ist was fehlgeschlagen - sorry',
           timeout: 6000
@@ -109,19 +119,9 @@ const actions = {
   showAddUpdateRideForm: ({commit, rootState}, {visible, isUpdate, startTime, date}) => {
     if (visible) {
       if (isUpdate) {
-        commit('setRide', {
-          driver: state.selectedEvent.driver,
-          destination: state.selectedEvent.destination,
-          startTime: state.selectedEvent.startTime,
-          endTime: state.selectedEvent.endTime,
-          bigCarNeeded: state.selectedEvent.bigCarNeeded,
-          isUpdate: true,
-          carName: state.selectedEvent.carName,
-          id: state.selectedEvent.id,
-          date: state.selectedEvent.date,
-          userId: state.selectedEvent.userId
-        })
+        commit('setIsUpdate', true)
       } else {
+        commit('setIsUpdate', false)
         let ride = getDefaultRideState()
         ride.date = date
         ride.startTime = startTime === '' ? defaultStartTime : startTime
@@ -164,11 +164,18 @@ const mutations = {
   setSelectedElement: (state, v) => state.selectedElement = v,
   setRides: (state, v) => state.rides = v,
   setRide: (state, ride) => state.ride = ride,
+  setIsUpdate: (state, v) => state.isUpdate = v,
   deleteSuccess(state, id) {
     state.selectedOpen = false
     state.rides = state.rides.filter(ride => ride.id !== id)
     state.ride = getDefaultRideState()
   },
+  updateRequest: (state) => state.status = {updating: true},
+  updateSuccess: (state) => state.status = {updated: true},
+  updateFailure: (state) => state.status = {},
+  addRequest: (state) => state.status = {updating: true},
+  addSuccess: (state) => state.status = {updated: true},
+  addFailure: (state) => state.status = {},
 };
 
 export const ride = {

@@ -63,9 +63,8 @@
                                 </v-col>
                                 <v-col>
                                     <v-btn @click="handleLogin" :disabled="status.loggingIn" data-cy="login-btn">
-                                        <v-progress-circular color="primary" v-if="status.loggingIn"
+                                        <v-progress-circular color="primary" v-if="status.loggingIn" class="mr-1"
                                                              size="12" width="2" indeterminate></v-progress-circular>
-                                        <span v-if="status.registering">&nbsp;</span>
                                         Login
                                     </v-btn>
                                 </v-col>

@@ -101,7 +101,11 @@
                                         erneut ein Auto zuweisen.
                                     </div>
                                     <v-btn @click="closeForm">Abbrechen</v-btn>
-                                    <v-btn @click="validateAndSubmitForm">{{saveButtonText}}</v-btn>
+                                    <v-btn @click="validateAndSubmitForm" :disabled="status.updating">
+                                        <v-progress-circular color="primary" v-if="status.updating" class="mr-1"
+                                                             size="12" width="2" indeterminate></v-progress-circular>
+                                        {{saveButtonText}}
+                                    </v-btn>
                                 </v-col>
                             </v-row>
                         </v-container>
@@ -114,7 +118,7 @@
 </template>
 
 <script>
-  import {mapActions} from 'vuex'
+  import {mapActions, mapState} from 'vuex'
 
   const constants = require('../_services/constants')
 
@@ -193,7 +197,7 @@
       },
       isUpdate: {
         get() {
-          return this.$store.state.ride.ride.isUpdate
+          return this.$store.state.ride.isUpdate
         }
       },
       isAdmin: function () {
@@ -213,6 +217,7 @@
     },
     methods: {
       ...mapActions('ride', ['addRide', 'updateRide']),
+      ...mapState('ride', ['status']),
       validateAndSubmitForm() {
         if (this.$refs.form.validate()) {
           if (this.isUpdate) {

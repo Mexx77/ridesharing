@@ -12,7 +12,7 @@ const actions = {
   login({dispatch, commit}, {usernamePhone, password, message}) {
     return new Promise((resolve, reject) => {
 
-      commit('loginRequest', {usernamePhone});
+      commit('loginRequest');
 
       userService.login(usernamePhone, password)
         .then(
@@ -85,9 +85,8 @@ const actions = {
 };
 
 const mutations = {
-  loginRequest(state, user) {
+  loginRequest(state) {
     state.status = {loggingIn: true};
-    state.user = user;
   },
   loginSuccess(state, user) {
     state.status = {loggedIn: true};

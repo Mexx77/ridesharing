@@ -83,9 +83,8 @@
                                 <v-col>
                                     <v-btn @click="showRegisterForm = false">Abbrechen</v-btn>
                                     <v-btn @click="handleRegister" :disabled="status.registering">
-                                        <v-progress-circular color="primary" v-if="status.registering"
+                                        <v-progress-circular color="primary" v-if="status.registering" class="mr-1"
                                                              size="12" width="2" indeterminate></v-progress-circular>
-                                        <span v-if="status.registering">&nbsp;</span>
                                         Registrieren
                                     </v-btn>
                                 </v-col>
