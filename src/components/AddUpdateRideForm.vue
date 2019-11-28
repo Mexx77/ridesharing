@@ -125,11 +125,17 @@
   export default {
     data() {
       return {
-        formIsValid: false,
-        cars: constants.cars
+        formIsValid: false
       }
     },
     computed: {
+      cars: function () {
+        if (this.bigCarNeeded) {
+          return constants.cars.filter(c => constants.carProperties[c].isBig)
+        } else {
+          return constants.cars
+        }
+      },
       saveButtonText() {
         if (this.isUpdate) {
           return 'Fahrt ändern'

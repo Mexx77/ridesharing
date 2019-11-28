@@ -102,6 +102,13 @@
           this.$store.commit('ride/setCarName', value)
         }
       },
+      cars: function () {
+        if (this.selectedEvent.bigCarNeeded) {
+          return constants.cars.filter(c => constants.carProperties[c].isBig)
+        } else {
+          return constants.cars
+        }
+      }
     },
     methods: {
       ...mapActions('ride', ['delete', 'updateRide']),
@@ -123,7 +130,6 @@
     },
     data() {
       return {
-        cars: constants.cars
       }
     }
   }
