@@ -18,10 +18,13 @@ const actions = {
         .then(
           user => {
             commit('loginSuccess', user);
+            if (user.isAdmin) {
+              dispatch('ride/refreshUnconfirmedRides', null, {root: true})
+            }
             dispatch('account/showLoginForm', false, {root: true})
             dispatch('alert/success', {
               message: message ? message : `Erfolgreich angemeldet. Schön dich wiederzusehen, ${user.firstName}! :)`,
-              timeout: 10000
+              timeout: 6000
             }, {root: true});
             resolve('loginSuccess');
           },
