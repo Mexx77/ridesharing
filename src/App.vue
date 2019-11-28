@@ -1,7 +1,17 @@
 <template>
     <v-app>
         <v-app-bar app>
-            <v-icon class="ml-3" large>mdi-bus-school</v-icon>
+            <v-badge overlap color="red darken-4">
+                <template v-if="isAdmin && unconfirmedRides > 0" v-slot:badge>
+                    <v-tooltip bottom>
+                        <template v-slot:activator="{ on }">
+                            <span v-on="on">{{unconfirmedRides}}</span>
+                        </template>
+                        <span>unbestätigte Fahrten</span>
+                    </v-tooltip>
+                </template>
+                <v-icon class="ml-2" large>mdi-bus-school</v-icon>
+            </v-badge>
             <v-toolbar-title class="headline text-uppercase mr-4 ml-3" v-if="$vuetify.breakpoint.mdAndUp">
                 <span class="font-weight-light">RIDESHARING</span>
             </v-toolbar-title>
@@ -46,26 +56,15 @@
             <v-snackbar top v-model="snackbar" :timeout="timeout" :color="alert.type">
                 {{ alert.message }}
                 <v-btn
-                    dark
-                    text
-                    @click="snackbar = false"
+                        dark
+                        text
+                        @click="snackbar = false"
                 >
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-snackbar>
         </v-content>
         <v-footer fixed>
-            <v-badge v-if="isAdmin" left class="ml-6" :color="unconfirmedRides > 0 ? 'red darken-4' : 'success'">
-                <template v-slot:badge>
-                    <span>{{unconfirmedRides}}</span>
-                </template>
-                <v-tooltip top open-on-hover color="primary">
-                    <template v-slot:activator="{ on }">
-                        <v-icon v-on="on">mdi-bus-school</v-icon>
-                    </template>
-                    <span>unbestätigte Fahrten</span>
-                </v-tooltip>
-            </v-badge>
             <v-spacer></v-spacer>
             <div v-if="$store.state.account.status.loggedIn">
                 <span style="vertical-align: text-top">Hi, {{$store.state.account.user.firstName}}!</span>
@@ -85,96 +84,96 @@
 </template>
 
 <script>
-  import Calendar from "./components/Calendar";
-  import LoginForm from "./components/LoginForm";
-  import RegisterForm from "./components/RegisterForm";
-  import {mapState, mapActions} from 'vuex';
-  import * as constants from "./_services/constants";
+    import Calendar from "./components/Calendar";
+    import LoginForm from "./components/LoginForm";
+    import RegisterForm from "./components/RegisterForm";
+    import {mapState, mapActions} from 'vuex';
+    import * as constants from "./_services/constants";
 
-  export default {
-    name: 'App',
-    components: {
-      Calendar,
-      LoginForm,
-      RegisterForm
-    },
-    data() {
-      return {
-        brandName: constants.brandName,
-        typeToLabel: {
-          month: 'Monat',
-          week: 'Woche',
-          day: 'Tag',
-          '4day': '4 Tage',
+    export default {
+        name: 'App',
+        components: {
+            Calendar,
+            LoginForm,
+            RegisterForm
         },
-      }
-    },
-    computed: {
-      ...mapState('calendar', ['today']),
-      ...mapState('ride', ['unconfirmedRides']),
-      ...mapState({
-        alert: state => state.alert
-      }),
-      snackbar: {
-        get() {
-          return this.$store.state.alert.visible
+        data() {
+            return {
+                brandName: constants.brandName,
+                typeToLabel: {
+                    month: 'Monat',
+                    week: 'Woche',
+                    day: 'Tag',
+                    '4day': '4 Tage',
+                },
+            }
         },
-        set(value) {
-          this.$store.dispatch('alert/setVisibility', value)
-        }
-      },
-      timeout: {
-        get() {
-          return this.$store.state.alert.timeout
-        }
-      },
-      type: {
-        get() {
-          return this.$store.state.calendar.type
+        computed: {
+            ...mapState('calendar', ['today']),
+            ...mapState('ride', ['unconfirmedRides']),
+            ...mapState({
+                alert: state => state.alert
+            }),
+            snackbar: {
+                get() {
+                    return this.$store.state.alert.visible
+                },
+                set(value) {
+                    this.$store.dispatch('alert/setVisibility', value)
+                }
+            },
+            timeout: {
+                get() {
+                    return this.$store.state.alert.timeout
+                }
+            },
+            type: {
+                get() {
+                    return this.$store.state.calendar.type
+                },
+                set(value) {
+                    this.$store.commit('calendar/setType', value)
+                }
+            },
+            focus: {
+                get() {
+                    return this.$store.state.calendar.focus
+                },
+                set(value) {
+                    this.$store.commit('calendar/setFocus', value)
+                }
+            },
+            isAdmin: function () {
+                return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
+            },
         },
-        set(value) {
-          this.$store.commit('calendar/setType', value)
-        }
-      },
-      focus: {
-        get() {
-          return this.$store.state.calendar.focus
+        methods: {
+            ...mapActions('account', ['logout']),
+            prev() {
+                this.$refs.calendar.prev()
+            },
+            next() {
+                this.$refs.calendar.next()
+            },
+            focusToday() {
+                this.focus = this.today
+            }
         },
-        set(value) {
-          this.$store.commit('calendar/setFocus', value)
-        }
-      },
-      isAdmin: function () {
-        return this.$store.state.account.status.loggedIn && this.$store.state.account.user.isAdmin
-      },
-    },
-    methods: {
-      ...mapActions('account', ['logout']),
-      prev() {
-        this.$refs.calendar.prev()
-      },
-      next() {
-        this.$refs.calendar.next()
-      },
-      focusToday() {
-        this.focus = this.today
-      }
-    },
-    mounted: function () {
-      if (this.$store.state.account.status.loggedIn) {
-        this.$store.dispatch('account/refreshToken')
-        if (this.$store.state.account.user.isAdmin) {
-          this.$store.dispatch("ride/refreshUnconfirmedRides")
-        }
-      } else {
-        this.$store.dispatch('alert/info', {
-          message: '💡 Um eine Fahrt hinzuzufügen, tippe neben die ungefähre Startzeit (dafür musst du angemeldet sein)',
-          timeout: 21000
-        })
-      }
+        mounted: function () {
+            if (this.$store.state.account.status.loggedIn) {
+                this.$store.dispatch('account/refreshToken')
+                if (this.$store.state.account.user.isAdmin) {
+                    this.$store.dispatch("ride/refreshUnconfirmedRides")
+                }
+            } else {
+                this.$store.dispatch('alert/info', {
+                    message: '💡 Um eine Fahrt hinzuzufügen, tippe neben die ungefähre Startzeit (dafür musst du angemeldet sein)',
+                    timeout: 21000
+                })
+            }
 
-    }
-  };
+        }
+    };
 </script>
 <style>
     .v-application--wrap .v-toolbar__content {
@@ -189,10 +188,5 @@
     body {
         overflow: hidden;
         overflow-y: auto;
-    }
-
-    footer .v-badge--left .v-badge__badge {
-        top: 0;
-        left: -28px;
     }
 </style>
