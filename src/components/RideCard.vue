@@ -92,7 +92,7 @@
           this.$store.state.account.user.id === this.selectedEvent.userId
       },
       isRideConfirmed: function () {
-        return this.selectedEvent.hasOwnProperty('carName')
+        return this.selectedEvent.carName
       },
       carName: {
         get() {
