@@ -86,7 +86,7 @@
                             </v-row>
                         </v-container>
                     </v-card-text>
-                    <v-card-actions class="mr-2 pb-4 pt-0">
+                    <v-card-actions class="pb-4 pt-0">
                         <v-container pt-0>
                             <v-row dense>
                                 <v-col>
@@ -100,7 +100,7 @@
                                         Ändern einer bestätigten Fahrt macht diese unbestätigt. Ein Admin muss dir dann
                                         erneut ein Auto zuweisen.
                                     </div>
-                                    <v-btn @click="closeForm">Abbrechen</v-btn>
+                                    <v-btn class="mr-4" @click="closeForm">Abbrechen</v-btn>
                                     <v-btn @click="validateAndSubmitForm" :disabled="status.updating">
                                         <v-progress-circular color="primary" v-if="status.updating" class="mr-1"
                                                              size="12" width="2" indeterminate></v-progress-circular>

@@ -1,8 +1,8 @@
 <template>
     <v-app>
         <v-app-bar app>
-            <v-badge overlap color="red darken-4">
-                <template v-if="isAdmin && unconfirmedRides > 0" v-slot:badge>
+             <v-badge overlap color="red darken-4" :value="unconfirmedRides > 0 && isAdmin">
+                <template v-slot:badge>
                     <v-tooltip bottom>
                         <template v-slot:activator="{ on }">
                             <span v-on="on">{{unconfirmedRides}}</span>

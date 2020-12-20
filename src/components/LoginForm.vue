@@ -3,7 +3,7 @@
         <v-dialog
             v-model="showLoginForm"
             :fullscreen="$vuetify.breakpoint.smAndDown"
-            hide-overlay max-width="400px"
+            hide-overlay max-width="430px"
         >
             <v-form
                 ref="form"
